@@ -14,13 +14,13 @@ router.get('/:id', productController.getSingleProduct);
 
 // Add a new product
 router.post('/add', 
-//   authMiddleware.authenticateSeller, 
-//   verifySeller, 
+  authMiddleware.authenticateSeller, 
+  verifySeller, 
   [uploadMiddleware.thumbnailUpload, uploadMiddleware.imagesUpload],
   productController.addProduct
 );
 
 // Get all products of a seller
-router.get('/seller', authMiddleware.authenticateSeller, productController.getSellerProducts);
+router.get('/seller/:id', authMiddleware.authenticateSeller, productController.getSellerProducts);
 
 module.exports = router;
