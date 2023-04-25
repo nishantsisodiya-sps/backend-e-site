@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // Register a new seller
 exports.registerSeller = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password , phone} = req.body;
 
     // Check if seller already exists
     const existingSeller = await Seller.findOne({ email });
@@ -18,9 +18,10 @@ exports.registerSeller = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newSeller = new Seller({
-      username,
+      name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      phone
     });
 
     await newSeller.save();

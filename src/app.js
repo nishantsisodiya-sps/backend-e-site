@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -18,7 +19,7 @@ app.use('/users', userRoutes);
 app.use('/products', productRoutes);
 
 // MongoDB Atlas connection
-mongoose.connect(process.env.MONGODB_URL, {
+mongoose.connect('mongodb+srv://nishantsisodiya:W9Ts90851N3QErRE@ecommcluster.ducmlqt.mongodb.net/?retryWrites=true&w=majority', {
 })
   .then(() => {
     console.log('Connected to MongoDB Atlas');

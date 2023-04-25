@@ -1,20 +1,26 @@
 const express = require('express');
-const router = express.Router();
 const productController = require('../controller/productController');
 const authMiddleware = require('../middleware/authMiddleware');
+const verifySeller = require('../middleware/verifySeller');
 const uploadMiddleware = require('../middleware/uploadMiddleware');
-const verifySeller = require('../middleware/authenticateSeller');
 
-// Add a new product
-router.post('/add', authMiddleware.authenticateSeller, verifySeller, uploadMiddleware.upload.single('image'), productController.addProduct);
+const router = express.Router();
 
 // Get all products
-router.get('/', verifySeller , productController.getProducts);
+router.get('/', productController.getProducts);
 
-// Get seller products
-router.get('/seller', verifySeller, authMiddleware.authenticateSeller, productController.getSellerProducts);
+// Get single product by ID
+router.get('/:id', productController.getSingleProduct);
 
-// Get a single product
-router.get('/:id',verifySeller ,productController.getSingleProduct);
+// Add a new product
+// router.post('/add', 
+//   authMiddleware.authenticateSeller, 
+//   verifySeller, 
+//   [uploadMiddleware.thumbnailUpload, uploadMiddleware.imagesUpload],
+//   productController.addProduct
+// );
+
+// Get all products of a seller
+router.get('/seller', authMiddleware.authenticateSeller, productController.getSellerProducts);
 
 module.exports = router;
