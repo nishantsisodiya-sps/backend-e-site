@@ -14,8 +14,8 @@ router.get('/:id', productController.getSingleProduct);
 
 // Add a new product
 router.post('/add', 
-  authMiddleware.authenticateSeller, 
-  verifySeller, 
+//   authMiddleware.authenticateSeller, 
+//   verifySeller, 
   [uploadMiddleware.thumbnailUpload, uploadMiddleware.imagesUpload],
   productController.addProduct
 );
