@@ -7,6 +7,4 @@ const verifySeller = (req, res, next) => {
   };
 
 
-  module.exports = {
-    verifySeller
-  };
+ module.exports = verifySeller
