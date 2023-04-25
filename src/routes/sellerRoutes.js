@@ -4,10 +4,10 @@ const sellerController = require('../controller/sellerController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // Register a seller
-router.post('/register', sellerController.register);
+router.post('/register', sellerController.registerSeller);
 
 // Log in a seller
-router.post('/login', sellerController.login);
+router.post('/login', sellerController.loginSeller);
 
 // Get seller profile
 router.get('/profile', authMiddleware.authenticateSeller, sellerController.getProfile);

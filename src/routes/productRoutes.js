@@ -3,7 +3,7 @@ const router = express.Router();
 const productController = require('../controller/productController');
 const authMiddleware = require('../middleware/authMiddleware');
 const uploadMiddleware = require('../middleware/uploadMiddleware');
-const verifySeller = require('../middlewares/authenticateSeller');
+const verifySeller = require('../middleware/authenticateSeller');
 
 // Add a new product
 router.post('/add', authMiddleware.authenticateSeller, verifySeller, uploadMiddleware.upload.single('image'), productController.addProduct);

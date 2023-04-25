@@ -1,7 +1,7 @@
-const upload = require('../middlewares/uploadMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 const products = require('../models/products')
 
-exports.addProduct = function (req, res, next) {
+exports.addProduct =  function (req, res, next) {
     upload(req, res, function (err) {
         if (err) {
             return next(err);
@@ -23,7 +23,7 @@ exports.addProduct = function (req, res, next) {
         });
 
         // Save the product to MongoDB
-        product.save(function (err, product) {
+            product.save(function (err, product) {
             if (err) {
                 return next(err);
             }
@@ -34,8 +34,8 @@ exports.addProduct = function (req, res, next) {
 
 
 
-exports.getProducts = function (req, res, next) {
-    products.find({}, function (err, products) {
+exports.getProducts =async function (req, res, next) {
+    await products.find({}, function (err, products) {
         if (err) {
             return next(err);
         }
@@ -44,10 +44,10 @@ exports.getProducts = function (req, res, next) {
 }
 
 
-exports.getSellerProducts = function (req, res, next) {
+exports.getSellerProducts = async function (req, res, next) {
     const sellerId = req.params.sellerId;
 
-    products.find({ sellerId: sellerId })
+    await products.find({ sellerId: sellerId })
         .exec(function (err, products) {
             if (err) {
                 return next(err);
@@ -60,10 +60,10 @@ exports.getSellerProducts = function (req, res, next) {
 
 
 
-exports.getSingleProduct = function(req, res, next) {
+exports.getSingleProduct = async function(req, res, next) {
     const productId = req.params.productId;
   
-    products.findById(productId, function(err, product) {
+    await products.findById(productId, function(err, product) {
       if (err) {
         return next(err);
       }
