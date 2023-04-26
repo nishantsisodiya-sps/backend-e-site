@@ -4,10 +4,14 @@ const jwt = require('jsonwebtoken');
 
 const sellerSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true , lowercase: true},
   password: { type: String, required: true },
   phone: { type: String, required: true },
   role: { type: String, enum: ['seller'], default: 'seller' },
+
+  tokens: [{
+    token: { type: String, required: true }
+  }]
 });
 
 sellerSchema.pre('save', async function (next) {
@@ -23,6 +27,7 @@ sellerSchema.pre('save', async function (next) {
   }
 });
 
+
 sellerSchema.methods.comparePassword = async function (enteredPassword) {
   try {
     return await bcrypt.compare(enteredPassword, this.password);
@@ -31,11 +36,20 @@ sellerSchema.methods.comparePassword = async function (enteredPassword) {
   }
 };
 
-sellerSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-  return token;
+sellerSchema.methods.generateAuthToken = async function () {
+  try {
+    const token = jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+    console.log(token);
+    this.tokens = this.tokens.concat({token});
+    const result = await this.save();
+    console.log('result', result);
+    return token; 
+  } catch (error) {
+    console.log(error);
+  }
+  
 };
 
 module.exports = mongoose.model('Seller', sellerSchema);

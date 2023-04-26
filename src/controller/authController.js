@@ -30,8 +30,8 @@ exports.login = function (req, res) {
             }
 
             // If the password is correct, generate a token and send it to the client
-            const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-            res.json({ token: token });
+            const token = user.generateAuthToken(); // call the generateAuthToken method on the user instance
+            res.json({ token: token , message: "Logged in successfully", success: true,});
         });
     });
 };
@@ -56,6 +56,5 @@ exports.register = function (req, res) {
         if (err) {
             return res.status(500).json({ message: err.message });
         }
-        res.status(201).json({ message: 'User created successfully' });
-    });
-};
+         });
+    }

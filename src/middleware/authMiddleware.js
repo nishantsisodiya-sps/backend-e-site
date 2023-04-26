@@ -5,9 +5,8 @@ const User = require('../models/user');
 const authenticateSeller = async (req, res, next) => {
   try {
     const token = req.header('Authorization').replace('Bearer ', '');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const seller = await Seller.findOne({ _id: decoded._id, 'tokens.token': token });
-
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const seller = await Seller.findOne({id: decoded._id, 'tokens.token': token });
     if (!seller) {
       throw new Error();
     }
@@ -23,7 +22,7 @@ const authenticateSeller = async (req, res, next) => {
 const authenticateUser = async (req, res, next) => {
   try {
     const token = req.header('Authorization').replace('Bearer ', '');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({ _id: decoded._id, 'tokens.token': token });
 
     if (!user) {

@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // Register a new seller
 exports.registerSeller = async (req, res) => {
   try {
-    const { name, email, password , phone} = req.body;
+    const { name, email, password, phone } = req.body;
 
     // Check if seller already exists
     const existingSeller = await Seller.findOne({ email });
@@ -21,14 +21,18 @@ exports.registerSeller = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      phone
+      phone,
+      tokens: []
     });
 
     await newSeller.save();
+    const token = jwt.sign({ id: newSeller._id  , email: newSeller.email , role : newSeller.role}, process.env.JWT_SECRET);
+    console.log(token);
+    newSeller.tokens.push({token}); // Add the token to the tokens array
+    await newSeller.save();
 
-    // Generate JWT token and return it to the client
-    const token = jwt.sign({ id: newSeller._id }, process.env.JWT_SECRET);
-    res.status(201).json({ token });
+
+    res.status(201).json({ token, success: true, message: "Logged in successfully", });
   } catch (err) {
     console.error(err);
     res.status(500).send();
@@ -54,7 +58,7 @@ exports.loginSeller = async (req, res) => {
 
     // Generate JWT token and return it to the client
     const token = jwt.sign({ id: existingSeller._id }, process.env.JWT_SECRET);
-    res.status(200).json({ token });
+    res.status(200).json({ token, success: true, message: "Logged in successfully", });
   } catch (err) {
     console.error(err);
     res.status(500).send();

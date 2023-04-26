@@ -4,10 +4,13 @@ const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true , lowercase: true },
   password: { type: String, required: true },
-  phone : {type : Number , required:true},
+  phone: { type: Number, required: true },
   role: { type: String, enum: ['user', 'seller', 'superAdmin'], default: 'user' },
+  tokens: [{
+    token: { type: String, required: true }
+  }]
 });
 
 userSchema.pre('save', async function (next) {
@@ -31,11 +34,17 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
   }
 };
 
-userSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-  return token;
-};
+userSchema.methods.generateAuthToken =async function () {
+  try {
+    const token = jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    })
+    this.tokens = this.tokens.concat({ token })
+    await this.save()
+    return token;
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 module.exports = mongoose.model('User', userSchema);

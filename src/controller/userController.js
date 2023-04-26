@@ -21,14 +21,20 @@ exports.registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      phone
+      phone,
+      tokens : []
     });
 
     await newUser.save();
 
     // Generate JWT token and return it to the client
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-    res.status(201).json({ token });
+    newUser.tokens.push({token}); // Add the token to the tokens array
+    await newUser.save()
+    res.status(201).json({ token  , success: true,
+      user: newUser.name,
+      email: newUser.email});
+
   } catch (err) {
     console.error(err);
     res.status(500).send();
@@ -49,12 +55,13 @@ exports.loginUser = async (req, res) => {
     // Check if password is correct
     const passwordMatch = await bcrypt.compare(password, existingUser.password);
     if (!passwordMatch) {
+      console.log("no match");
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     // Generate JWT token and return it to the client
     const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET);
-    res.status(200).json({ token });
+    res.status(200).json({ token , success: true, message: "Logged in successfully", });
   } catch (err) {
     console.error(err);
     res.status(500).send();

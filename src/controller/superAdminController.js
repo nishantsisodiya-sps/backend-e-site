@@ -27,7 +27,7 @@ exports.registerSuperAdmin = async (req, res) => {
 
     // Generate JWT token and return it to the client
     const token = jwt.sign({ id: newSuperAdmin._id }, process.env.JWT_SECRET);
-    res.status(201).json({ token });
+    res.status(201).json({ token , });
   } catch (err) {
     console.error(err);
     res.status(500).send();
@@ -53,7 +53,7 @@ exports.loginSuperAdmin = async (req, res) => {
 
     // Generate JWT token and return it to the client
     const token = jwt.sign({ id: existingSuperAdmin._id }, process.env.JWT_SECRET);
-    res.status(200).json({ token });
+    res.status(200).json({ token , });
   } catch (err) {
     console.error(err);
     res.status(500).send();
