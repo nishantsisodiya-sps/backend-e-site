@@ -5,6 +5,10 @@ const jwt = require('jsonwebtoken');
 // Register a new seller
 exports.registerSeller = async (req, res) => {
   try {
+    if (!req.body || !req.body.name || !req.body.email || !req.body.password || !req.body.phone) {
+      return res.status(400).json({ message: 'Missing required fields in request body' });
+    }
+
     const { name, email, password, phone } = req.body;
 
     // Check if seller already exists

@@ -1,79 +1,42 @@
 const uploadMiddleware = require('../middleware/uploadMiddleware');
-// const products = require('../models/products')
-
-// exports.addProduct = async (req, res) => {
-//   // Validate the request body
-//   const errors = validationResult(req);
-//   if (!errors.isEmpty()) {
-//     return res.status(400).json({ errors: errors.array() });
-//   }
-
-//   // Create a new product instance with uploaded file names and the seller id
-//   const product = new products({
-//     title: req.body.title,
-//     description: req.body.description,
-//     price: req.body.price,
-//     discountPercentage: req.body.discountPercentage,
-//     rating: req.body.rating,
-//     brand: req.body.brand,
-//     stock: req.body.stock,
-//     category: req.body.category,
-//     seller: req.user.id, // Get seller id from authenticated user
-//     thumbnail: req.file['thumbnail'][0].filename,
-//     images: req.file['images'].map((file) => file.filename),
-//   });
-
-//   // Save the product to MongoDB
-//   try {
-//     const savedProduct = await product.save();
-//     res.status(201).json(savedProduct);
-//   } catch (err) {
-//     res.status(500).send('Server error');
-//   }
-// };
-
-
-
 const products = require('../models/products');
 const { validationResult } = require('express-validator');
-const { thumbnailUpload, imagesUpload } = require('../middleware/uploadMiddleware');
+
 
 exports.addProduct = async (req, res) => {
   // Validate the request body
+  const thumbnail = req.files['thumbnail'][0].filename;
+  const images = req.files['images'].map(file => file.filename)
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  try {
-    // Upload thumbnail and images
-    thumbnailUpload(req, res);
-    imagesUpload(req, res);
-
-    // Create a new product instance with uploaded file names and the seller id
+  uploadMiddleware.upload(req, res, function (err) {
+    if (err) {
+      console.log(err);
+    }
+    // Create a new product instance with uploaded file names
     const product = new products({
       title: req.body.title,
       description: req.body.description,
       price: req.body.price,
       discountPercentage: req.body.discountPercentage,
       rating: req.body.rating,
-      brand: req.body.brand,
       stock: req.body.stock,
       category: req.body.category,
-      seller: req.user.id, // Get seller id from authenticated user
-      thumbnail: req.file.filename,
-      images: req.files.map((file) => file.filename),
+      thumbnail: thumbnail,
+      images: images,
     });
 
     // Save the product to MongoDB
-    const savedProduct = await product.save();
-    res.status(201).json(savedProduct);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
-};
-
+    product.save()
+      .then(product => {
+        res.send(product);
+      })
+      .catch(err=>console.log(err));
+  })
+}
 
 
 

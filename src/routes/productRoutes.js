@@ -16,9 +16,10 @@ router.get('/:id', productController.getSingleProduct);
 router.post('/add', 
   authMiddleware.authenticateSeller, 
   verifySeller, 
-  [uploadMiddleware.thumbnailUpload, uploadMiddleware.imagesUpload],
+uploadMiddleware.upload,
   productController.addProduct
 );
+
 
 // Get all products of a seller
 router.get('/seller/:id', authMiddleware.authenticateSeller, productController.getSellerProducts);
