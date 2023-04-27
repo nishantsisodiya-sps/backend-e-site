@@ -95,17 +95,12 @@ exports.getSellerProducts = async function (req, res, next) {
 
 
 exports.getSingleProduct = async function (req, res, next) {
-  const productId = req.params.productId;
-
-  await products.findById(productId, function (err, product) {
-    if (err) {
-      return next(err);
-    }
-
+  const productId = req.params.id;
+  console.log(productId);
+  const product = await products.findById(productId) 
+  
     if (!product) {
       return res.status(404).send('Product not found');
     }
-
     res.send(product);
-  });
-};
+  }
