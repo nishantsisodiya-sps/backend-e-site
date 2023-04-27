@@ -7,6 +7,16 @@ exports.addProduct = async (req, res) => {
   // Validate the request body
   const thumbnail = req.files['thumbnail'][0].filename;
   const images = req.files['images'].map(file => file.filename)
+  const title = req.body.title
+  const description = req.body.description
+  const price = req.body.price
+  const discountPercentage= req.body.discountPercentage
+  const rating= req.body.rating
+  const stock= req.body.stock
+  const category= req.body.category
+  const brand = req.body.brand
+  const seller = req.seller._id
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -18,15 +28,17 @@ exports.addProduct = async (req, res) => {
     }
     // Create a new product instance with uploaded file names
     const product = new products({
-      title: req.body.title,
-      description: req.body.description,
-      price: req.body.price,
-      discountPercentage: req.body.discountPercentage,
-      rating: req.body.rating,
-      stock: req.body.stock,
-      category: req.body.category,
+      title: title,
+      description: description,
+      price: price,
+      discountPercentage: discountPercentage,
+      rating: rating,
+      stock: stock,
+      brand : brand,
+      category: category,
       thumbnail: thumbnail,
       images: images,
+      seller : seller
     });
 
     // Save the product to MongoDB
@@ -34,7 +46,7 @@ exports.addProduct = async (req, res) => {
       .then(product => {
         res.send(product);
       })
-      .catch(err=>console.log(err));
+      .catch(err => console.log(err));
   })
 }
 
