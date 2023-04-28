@@ -6,6 +6,7 @@ const cors = require('cors');
 const sellerRoutes = require('./routes/sellerRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
+const cartRoutes = require('./routes/cartRoutes');
 const path = require('path');
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
@@ -18,6 +19,7 @@ app.use(cors());
 app.use('/sellers', sellerRoutes);
 app.use('/users', userRoutes);
 app.use('/products', productRoutes);
+app.use('/cart', cartRoutes);
 
 
 

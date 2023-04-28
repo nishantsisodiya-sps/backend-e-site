@@ -1,7 +1,7 @@
 const uploadMiddleware = require('../middleware/uploadMiddleware');
 const products = require('../models/products');
 const { validationResult } = require('express-validator');
-
+const mongoose = require('mongoose')
 
 exports.addProduct = async (req, res) => {
   // Validate the request body
@@ -79,24 +79,23 @@ exports.getProducts = async function (req, res, next) {
 
 
 exports.getSellerProducts = async function (req, res, next) {
-  const sellerId = req.params.sellerId;
+  const seller = req.params.sellerId;
 
-  await products.findById({ sellerId: sellerId })
-    .exec(function (err, products) {
-      if (err) {
-        return next(err);
-      }
+  if (!mongoose.Types.ObjectId.isValid(seller)) {
+    return res.status(400).send('Invalid sellerId');
+  }
 
-      res.send(products);
-    });
+  try {
+    const Myproducts = await products.find({seller});
+    res.send(Myproducts);
+  } catch (err) {
+    return next(err);
+  }
 };
-
-
 
 
 exports.getSingleProduct = async function (req, res, next) {
   const productId = req.params.id;
-  console.log(productId);
   const product = await products.findById(productId) 
   
     if (!product) {

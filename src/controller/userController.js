@@ -28,7 +28,7 @@ exports.registerUser = async (req, res) => {
     await newUser.save();
 
     // Generate JWT token and return it to the client
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: newUser._id ,  email: newUser.email , role : newUser.role}, process.env.JWT_SECRET);
     newUser.tokens.push({token}); // Add the token to the tokens array
     await newUser.save()
     res.status(201).json({ token  , success: true,
@@ -43,6 +43,7 @@ exports.registerUser = async (req, res) => {
 
 // Login a user
 exports.loginUser = async (req, res) => {
+  console.log("hello");
   try {
     const { email, password } = req.body;
 
@@ -55,12 +56,12 @@ exports.loginUser = async (req, res) => {
     // Check if password is correct
     const passwordMatch = await bcrypt.compare(password, existingUser.password);
     if (!passwordMatch) {
-      console.log("no match");
+      console.log(existingUser.password);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     // Generate JWT token and return it to the client
-    const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: existingUser._id , email: existingUser.email , role : existingUser.role }, process.env.JWT_SECRET);
     res.status(200).json({ token , success: true, message: "Logged in successfully", });
   } catch (err) {
     console.error(err);
@@ -71,7 +72,8 @@ exports.loginUser = async (req, res) => {
 
 exports.getProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const userId = req.params.id
+    const user = await User.findById(userId)
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }

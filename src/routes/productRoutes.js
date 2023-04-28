@@ -22,6 +22,8 @@ uploadMiddleware.upload,
 
 
 // Get all products of a seller
-router.get('/seller/:id', authMiddleware.authenticateSeller, productController.getSellerProducts);
+router.get('/seller/:sellerId', 
+authMiddleware.authenticateSeller,
+ productController.getSellerProducts);
 
 module.exports = router;

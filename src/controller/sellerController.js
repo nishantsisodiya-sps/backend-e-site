@@ -1,5 +1,5 @@
 const Seller = require('../models/seller');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Register a new seller
@@ -47,15 +47,18 @@ exports.registerSeller = async (req, res) => {
 exports.loginSeller = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(req.body.password);
 
     // Check if seller exists
-    const existingSeller = await Seller.findOne({ email });
+    const existingSeller = await Seller.findOne({ email : email });
     if (!existingSeller) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     // Check if password is correct
     const passwordMatch = await bcrypt.compare(password, existingSeller.password);
+    console.log(password);
+    console.log(existingSeller.password);
     if (!passwordMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -73,7 +76,8 @@ exports.loginSeller = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const seller = await Seller.findById(req.user.id);
+    const sellerId = req.params.id
+    const seller = await Seller.findById(sellerId);
     if (!seller) {
       return res.status(404).json({ error: 'Seller not found' });
     }
