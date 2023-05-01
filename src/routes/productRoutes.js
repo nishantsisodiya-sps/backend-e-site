@@ -26,4 +26,15 @@ router.get('/seller/:sellerId',
 authMiddleware.authenticateSeller,
  productController.getSellerProducts);
 
+
+router.patch('/:id',
+authMiddleware.authenticateSeller,
+uploadMiddleware.upload,
+productController.updateProduct)
+
+
+router.delete('/:id',
+authMiddleware.authenticateSeller,
+productController.deleteProduct)
+
 module.exports = router;

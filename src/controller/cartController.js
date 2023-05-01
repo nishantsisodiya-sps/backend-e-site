@@ -1,6 +1,8 @@
 const Cart = require('../models/cart');
 const Product = require('../models/products')
 
+// Add products to Cart
+
 exports.addToCart = async (req, res) => {
   try {
     const { user, product, quantity } = req.body;
@@ -14,10 +16,10 @@ exports.addToCart = async (req, res) => {
       await existingCartItem.save();
     } else {
       // If not, add a new item to the cart
-      const cartItem = new Cart({ 
-        user : user,
-        product : product,
-        quantity : quantity
+      const cartItem = new Cart({
+        user: user,
+        product: product,
+        quantity: quantity
       });
       await cartItem.save();
     }
@@ -31,9 +33,9 @@ exports.addToCart = async (req, res) => {
 
 
 
+//Get Cart products for specific user id
 
-
-exports.getCart = async(req, res) => {
+exports.getCart = async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -60,9 +62,9 @@ exports.getCart = async(req, res) => {
           rating: productInfo.rating,
           discountPercentage: productInfo.discountPercentage,
           stock: productInfo.stock,
-          images : productInfo.images,
-          brand : productInfo.brand,
-          category : productInfo.category
+          images: productInfo.images,
+          brand: productInfo.brand,
+          category: productInfo.category
         },
       };
     }));
@@ -72,3 +74,27 @@ exports.getCart = async(req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+// Delete products from cart 
+
+
+exports.DeleteProduct = async (req, res) => {
+  try {
+
+    const { user, product } = req.body;
+
+    //// Find the cart item for the user and product
+    const cartItem = await Product.findOne({ user, product })
+
+    if (!cartItem) {
+      return res.status(404).json({ message: 'Product not found' })
+    }
+
+    await cartItem.remove();
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+}

@@ -18,7 +18,7 @@ exports.registerSeller = async (req, res) => {
     }
 
     // Hash password and create seller
-    const salt = await bcrypt.genSalt();
+    const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newSeller = new Seller({
@@ -36,12 +36,14 @@ exports.registerSeller = async (req, res) => {
     await newSeller.save();
 
 
-    res.status(201).json({ token, success: true, message: "Logged in successfully", });
+    res.status(201).json({ token, success: true, message: "Sign in successfully", });
   } catch (err) {
     console.error(err);
     res.status(500).send();
   }
 };
+
+
 
 // Login a seller
 exports.loginSeller = async (req, res) => {
@@ -57,15 +59,18 @@ exports.loginSeller = async (req, res) => {
 
     // Check if password is correct
     const passwordMatch = await bcrypt.compare(password, existingSeller.password);
-    console.log(password);
+    console.log(passwordMatch);
     console.log(existingSeller.password);
     if (!passwordMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    
     // Generate JWT token and return it to the client
-    const token = jwt.sign({ id: existingSeller._id }, process.env.JWT_SECRET);
-    res.status(200).json({ token, success: true, message: "Logged in successfully", });
+      const token = jwt.sign({ id: existingSeller._id }, process.env.JWT_SECRET);
+      res.status(200).json({ token, success: true, message: "Logged in successfully", });
+  
+
   } catch (err) {
     console.error(err);
     res.status(500).send();

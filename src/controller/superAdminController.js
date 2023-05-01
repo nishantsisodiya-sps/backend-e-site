@@ -14,7 +14,7 @@ exports.registerSuperAdmin = async (req, res) => {
     }
 
     // Hash password and create super admin
-    const salt = await bcrypt.genSalt();
+    const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newSuperAdmin = new SuperAdmin({

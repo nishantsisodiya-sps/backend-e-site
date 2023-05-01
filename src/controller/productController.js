@@ -95,11 +95,87 @@ exports.getSellerProducts = async function (req, res, next) {
 
 
 exports.getSingleProduct = async function (req, res, next) {
-  const productId = req.params.id;
-  const product = await products.findById(productId) 
-  
-    if (!product) {
-      return res.status(404).send('Product not found');
-    }
-    res.send(product);
+
+  try {
+
+    const productId = req.params.id;
+    const product = await products.findById(productId) 
+    
+      if (!product) {
+        return res.status(404).send('Product not found');
+      }
+      res.send(product);
+
+  } catch (error) {
+
+    console.log('Get single product error' , error);
+    res.status(500).json({message : error.message})
   }
+
+  }
+
+
+  //Delete Product Api
+
+
+exports.deleteProduct = async function (req , res , next){
+  try {
+    
+    const sellerId = req.seller._id
+    const productId = req.params.id;
+    
+    const Product = await products.findOne({_id : productId , seller : sellerId})
+    console.log(Product);
+    if(!Product){
+      return res.status(404).json({message : 'Product Not Found'})
+    }
+    await products.findByIdAndDelete(productId)
+    res.status(200).json({message : 'Product Deleted successfully'});
+
+  } catch (error) {
+
+    console.log('Delete prduct error ===>' ,error);
+    res.status(500).json({message : error.message})
+
+  }
+
+}
+
+
+  // Update product API 
+  exports.updateProduct = async function(req, res) {
+    try {
+      const sellerId = req.seller._id;
+      const productId = req.params.id;
+  
+      const product = await products.findOne({ _id: productId, seller: sellerId });
+  
+      if (!product) {
+        return res.status(404).json({ message: 'Product Not Found' });
+      }
+  
+      const updatedProduct = await product.findByIdAndUpdate(
+        productId,
+        {
+          title: req.body.title,
+          description: req.body.description,
+          price: req.body.price,
+          discountPercentage: req.body.discountPercentage,
+          rating: req.body.rating,
+          brand: req.body.brand,
+          stock: req.body.stock,
+          category: req.body.category,
+          thumbnail: req.file.path,
+          images: req.files.map(file => file.path),
+        },
+        { new: true }
+      );
+  
+      console.log(updatedProduct);
+  
+      res.status(200).json({ message: 'Product Updated successfully', product: updatedProduct });
+    } catch (error) {
+      console.log('Update product error ===>', error);
+      res.status(500).json({ message: error.message });
+    }
+  };
