@@ -14,6 +14,7 @@ exports.addToCart = async (req, res) => {
       // If it is, update the quantity
       existingCartItem.quantity += quantity;
       await existingCartItem.save();
+       res.status(200).json({ message: 'Product quantity updated in cart', itemId: existingCartItem._id });
     } else {
       // If not, add a new item to the cart
       const cartItem = new Cart({
@@ -47,9 +48,7 @@ exports.getCart = async (req, res) => {
 
     const cartItemsWithProductInfo = await Promise.all(cartItems.map(async (cartItem) => {
       const { product, quantity } = cartItem;
-
       const productInfo = await Product.findById(product);
-
       return {
         id: cartItem._id,
         quantity,
@@ -79,22 +78,25 @@ exports.getCart = async (req, res) => {
 // Delete products from cart 
 
 
-exports.DeleteProduct = async (req, res) => {
+exports.removeFromCart = async (req, res) => {
   try {
+    const itemId = req.params.cartItemId;
+    console.log(itemId);
 
-    const { user, product } = req.body;
-
-    //// Find the cart item for the user and product
-    const cartItem = await Product.findOne({ user, product })
+    // Find the cart item with the given id
+    const cartItem = await Cart.findById(itemId);
+    console.log('cartitem==>' , cartItem);
 
     if (!cartItem) {
-      return res.status(404).json({ message: 'Product not found' })
+      throw new Error('Cart item not found');
     }
 
-    await cartItem.remove();
+    // Delete the cart item
+    await cartItem.deleteOne();
 
+    res.status(200).json({ message: 'Product removed from cart successfully' });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
   }
-}
+};

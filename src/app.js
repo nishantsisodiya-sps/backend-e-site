@@ -11,7 +11,6 @@ const path = require('path');
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
-
 // Middleware
 app.use(cors());
 
