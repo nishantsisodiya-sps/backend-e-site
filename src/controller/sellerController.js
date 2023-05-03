@@ -1,42 +1,34 @@
 const Seller = require('../models/seller');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const seller = require('../models/seller');
 
 // Register a new seller
 exports.registerSeller = async (req, res) => {
   try {
-    if (!req.body || !req.body.name || !req.body.email || !req.body.password || !req.body.phone) {
-      return res.status(400).json({ message: 'Missing required fields in request body' });
-    }
-
-    const { name, email, password, phone } = req.body;
+     const { name, email, password, phone } = req.body;
 
     // Check if seller already exists
     const existingSeller = await Seller.findOne({ email });
     if (existingSeller) {
-      return res.status(400).json({ message: 'Seller already exists' });
+      return res.status(409).json({ message: 'Seller already exists' });
     }
 
-    // Hash password and create seller
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
+    //Creating seller
     const newSeller = new Seller({
       name,
       email,
-      password: hashedPassword,
+      password,
       phone,
       tokens: []
     });
 
     await newSeller.save();
-    const token = jwt.sign({ id: newSeller._id  , email: newSeller.email , role : newSeller.role}, process.env.JWT_SECRET);
-    console.log(token);
-    newSeller.tokens.push({token}); // Add the token to the tokens array
-    await newSeller.save();
+
+    const authToken = await newSeller.generateAuthToken();
 
 
-    res.status(201).json({ token, success: true, message: "Sign in successfully", });
+    res.status(201).json({ token : authToken, success: true, message: "Sign in successfully", });
   } catch (err) {
     console.error(err);
     res.status(500).send();
@@ -49,7 +41,7 @@ exports.registerSeller = async (req, res) => {
 exports.loginSeller = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(req.body.password);
+  
 
     // Check if seller exists
     const existingSeller = await Seller.findOne({ email : email });
@@ -59,16 +51,13 @@ exports.loginSeller = async (req, res) => {
 
     // Check if password is correct
     const passwordMatch = await bcrypt.compare(password, existingSeller.password);
-    console.log(passwordMatch);
-    console.log(existingSeller.password);
     if (!passwordMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid password' });
     }
 
     
-    // Generate JWT token and return it to the client
-      const token = jwt.sign({ id: existingSeller._id }, process.env.JWT_SECRET);
-      res.status(200).json({ token, success: true, message: "Logged in successfully", });
+    const authToken = await existingSeller.generateAuthToken();
+      res.status(200).json({ token:authToken, success: true, message: "Logged in successfully", });
   
 
   } catch (err) {

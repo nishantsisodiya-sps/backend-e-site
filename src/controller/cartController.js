@@ -5,10 +5,11 @@ const Product = require('../models/products')
 
 exports.addToCart = async (req, res) => {
   try {
-    const { user, product, quantity } = req.body;
+    const { user,seller, product, quantity } = req.body;
+    console.log(seller);
 
     // Check if the product is already in the user's cart
-    const existingCartItem = await Cart.findOne({ user, product });
+    const existingCartItem = await Cart.findOne({ $or: [{ user: user }, { seller: seller }], product });
 
     if (existingCartItem) {
       // If it is, update the quantity
@@ -18,14 +19,15 @@ exports.addToCart = async (req, res) => {
     } else {
       // If not, add a new item to the cart
       const cartItem = new Cart({
-        user: user,
+        user: user || null, // set to null if userId is not provided
+        seller: seller || null, // set to null if sellerId is not provided
         product: product,
         quantity: quantity
       });
       await cartItem.save();
+      res.status(200).json({ message: 'Product added to cart successfully' });
     }
 
-    res.status(200).json({ message: 'Product added to cart successfully' });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
@@ -38,9 +40,11 @@ exports.addToCart = async (req, res) => {
 
 exports.getCart = async (req, res) => {
   try {
-    const { userId } = req.params;
+    console.log(req.params);
+    const { userId} = req.params;
+    // console.log('sellerId',sellerId);
 
-    const cartItems = await Cart.find({ user: userId }).populate('product');
+    const cartItems = await Cart.find({userId}).populate('product');
 
     if (!cartItems) {
       return res.status(404).json({ message: 'Cart not found for the given user' });
@@ -93,6 +97,7 @@ exports.removeFromCart = async (req, res) => {
 
     // Delete the cart item
     await cartItem.deleteOne();
+    
 
     res.status(200).json({ message: 'Product removed from cart successfully' });
   } catch (error) {

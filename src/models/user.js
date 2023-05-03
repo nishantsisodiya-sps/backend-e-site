@@ -8,6 +8,10 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phone: { type: Number, required: true },
   role: { type: String, enum: ['user', 'seller', 'superAdmin'], default: 'user' },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
   tokens: [{
     token: { type: String, required: true }
   }]
@@ -16,8 +20,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function (next) {
   try {
     if (this.isModified('password')) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(this.password, salt);
+      const hashedPassword = await bcrypt.hash(this.password, 10);
       this.password = hashedPassword;
     }
     next();
@@ -26,13 +29,6 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-userSchema.methods.comparePassword = async function (enteredPassword) {
-  try {
-    return await bcrypt.compare(enteredPassword, this.password);
-  } catch (err) {
-    throw new Error(err);
-  }
-};
 
 userSchema.methods.generateAuthToken =async function () {
   try {

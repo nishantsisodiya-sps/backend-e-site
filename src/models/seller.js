@@ -7,8 +7,12 @@ const sellerSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true , lowercase: true},
   password: { type: String, required: true },
   phone: { type: String, required: true },
-  role: { type: String, enum: ['seller'], default: 'seller' },
 
+  role: { type: String, enum: ['seller'], default: 'seller' },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
   tokens: [{
     token: { type: String, required: true }
   }]
@@ -17,8 +21,7 @@ const sellerSchema = new mongoose.Schema({
 sellerSchema.pre('save', async function (next) {
   try {
     if (this.isModified('password')) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(this.password, salt);
+      const hashedPassword = await bcrypt.hash(this.password, 10);
       this.password = hashedPassword;
     }
     next();
@@ -28,23 +31,13 @@ sellerSchema.pre('save', async function (next) {
 });
 
 
-sellerSchema.methods.comparePassword = async function (enteredPassword) {
-  try {
-    return await bcrypt.compare(enteredPassword, this.password);
-  } catch (err) {
-    throw new Error(err);
-  }
-};
-
 sellerSchema.methods.generateAuthToken = async function () {
   try {
     const token = jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
-    console.log(token);
     this.tokens = this.tokens.concat({token});
-    const result = await this.save();
-    console.log('result', result);
+     await this.save();
     return token; 
   } catch (error) {
     console.log(error);

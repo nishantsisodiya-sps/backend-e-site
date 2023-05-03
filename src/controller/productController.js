@@ -145,6 +145,7 @@ exports.deleteProduct = async function (req , res , next){
   // Update product API 
   exports.updateProduct = async function(req, res) {
     try {
+      console.log('file =========>',req.files.thumbnail[`filename`]);
       const sellerId = req.seller._id;
       const productId = req.params.id;
   
@@ -154,7 +155,7 @@ exports.deleteProduct = async function (req , res , next){
         return res.status(404).json({ message: 'Product Not Found' });
       }
   
-      const updatedProduct = await product.findByIdAndUpdate(
+      const updatedProduct = await products.findByIdAndUpdate(
         productId,
         {
           title: req.body.title,
@@ -165,13 +166,13 @@ exports.deleteProduct = async function (req , res , next){
           brand: req.body.brand,
           stock: req.body.stock,
           category: req.body.category,
-          thumbnail: req.file.path,
-          images: req.files.map(file => file.path),
+          thumbnail: req.body.thumbnail,
+          images: req.body.images
         },
         { new: true }
       );
   
-      console.log(updatedProduct);
+      // console.log(updatedProduct);
   
       res.status(200).json({ message: 'Product Updated successfully', product: updatedProduct });
     } catch (error) {
