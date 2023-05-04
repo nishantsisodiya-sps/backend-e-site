@@ -7,7 +7,6 @@ dotenv.config();
 // Create a new order
 exports.createOrder = async (req, res) => {
   const { userId, address, amount } = req.body;
-  console.log('id=======>' , req.body.userId);
  
 
   try {
@@ -31,12 +30,13 @@ exports.createOrder = async (req, res) => {
 
     // Create order in our database
     const newOrder = new Order({
-      user: userId,
-      address : address,
-      amount : amount,
-      razorpayOrderId: order.id,
+      userId: userId,
+      address: address,
+      amount: amount,
       status: 'placed',
+      paymentId: order.id
     });
+
 
     const savedOrder = await newOrder.save();
 
