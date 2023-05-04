@@ -58,7 +58,7 @@ exports.loginUser = async (req, res) => {
     const authToken = await user.generateAuthToken();
 
     // Send response with authentication token
-    return res.status(200).json({ message: 'Login successful', token: authToken });
+    return res.status(200).json({ message: 'Login successful', token: authToken , success : true });
   } catch (error) {
     return res.status(500).json({ message: 'Server error', error: error.message });
   }

@@ -36,7 +36,6 @@ exports.registerSeller = async (req, res) => {
 };
 
 
-
 // Login a seller
 exports.loginSeller = async (req, res) => {
   try {

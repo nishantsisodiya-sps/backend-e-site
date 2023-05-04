@@ -5,21 +5,26 @@ const Product = require('../models/products')
 
 exports.addToCart = async (req, res) => {
   try {
-    const { user,seller, product, quantity } = req.body;
+    const { user, product, quantity, seller } = req.body;
     console.log(seller);
 
     // Check if the product is already in the user's cart
-    const existingCartItem = await Cart.findOne({ $or: [{ user: user }, { seller: seller }], product });
+    let existingCartItem;
+    if (seller) {
+      existingCartItem = await Cart.findOne({ seller: seller, product: product });
+    } else {
+      existingCartItem = await Cart.findOne({ user: user, product: product });
+    }
 
     if (existingCartItem) {
       // If it is, update the quantity
       existingCartItem.quantity += quantity;
       await existingCartItem.save();
-       res.status(200).json({ message: 'Product quantity updated in cart', itemId: existingCartItem._id });
+      res.status(200).json({ message: 'Product quantity updated in cart', itemId: existingCartItem._id });
     } else {
       // If not, add a new item to the cart
       const cartItem = new Cart({
-        user: user || null, // set to null if userId is not provided
+        user: user,
         seller: seller || null, // set to null if sellerId is not provided
         product: product,
         quantity: quantity
@@ -27,7 +32,6 @@ exports.addToCart = async (req, res) => {
       await cartItem.save();
       res.status(200).json({ message: 'Product added to cart successfully' });
     }
-
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
@@ -36,15 +40,16 @@ exports.addToCart = async (req, res) => {
 
 
 
+
 //Get Cart products for specific user id
 
 exports.getCart = async (req, res) => {
   try {
-    console.log(req.params);
-    const { userId} = req.params;
-    // console.log('sellerId',sellerId);
+    const { userId } = req.params;
 
-    const cartItems = await Cart.find({userId}).populate('product');
+    const cartItems = await Cart.find({
+      $or: [{ user: userId }, { seller: userId }]
+    }).populate('product');
 
     if (!cartItems) {
       return res.status(404).json({ message: 'Cart not found for the given user' });
