@@ -183,4 +183,27 @@ exports.deleteProduct = async function (req , res , next){
 
 
 
+  // exports.searchProducts = async function(req, res) {
+  //   try {
+  //     const page = parseInt(req.query.page) || 1; // Getting the current page from the query parameters, default to 1
+  //     const limit = 5; // Setting the limit of products per page to 5
+  //     const searchQuery = req.query.q; // Getting the search query from the query parameters
+  
+  //     const count = await products.countDocuments({ $text: { $search: searchQuery } }); //to Count the total number of products that match the search query
+  //     const totalPages = Math.ceil(count / limit); //to Calculate the total number of pages
+  
+  //     const products1 = await products.find({ $text: { $search: searchQuery } })
+  //       .skip((page - 1) * limit) //to Skip the products that have been displayed in the previous pages
+  //       .limit(limit); //to Limit the number of products to be displayed on this page
+  
+  //     res.status(200).json({
+  //       totalPages: totalPages,
+  //       currentPage: page,
+  //       products: products1
+  //     });
+  //   } catch (error) {
+  //     console.log('error:', error);
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // };
   

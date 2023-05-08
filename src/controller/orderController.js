@@ -1,14 +1,14 @@
+const dotenv = require('dotenv');
+dotenv.config();
 const Order = require('../models/order');
 const Razorpay = require('razorpay');
 const { v4: uuidv4 } = require('uuid');
-const dotenv = require('dotenv');
-dotenv.config();
+// const { default: orders } = require('razorpay/dist/types/orders');
 
 // Create a new order
 
 exports.createOrder = async (req, res) => {
-  const { userId, address, amount } = req.body;
-
+  const { userId, address, amount , products} = req.body;
   try {
     const razorpay = new Razorpay({
       key_id: 'rzp_test_Tiv5oHxAC3kTlH',
@@ -30,12 +30,12 @@ exports.createOrder = async (req, res) => {
     
     // Create order in Razorpay
     const order = await razorpay.orders.create(options);
-    console.log('order id=====>' ,order);
     // Create order in our database
     const newOrder = new Order({
       userId: userId,
       address: address,
       amount: amount,
+      products : products,
       status: 'placed',
       paymentId: order.id
     });
@@ -44,48 +44,64 @@ exports.createOrder = async (req, res) => {
 
     res.json({ orderId: savedOrder._id, razorpayOrderId: order });
   } catch (error) {
-    console.error(error);
+    console.error('Create order error=========>' ,error);
     res.status(500).json({ error: 'Unable to create order' });
   }
 };
 
 // Update an order
 exports.updateOrder = async (req, res) => {
-  const { paymentId, signature } = req.body;
-
+  const { paymentId } = req.body;
+  console.log('id==>' , req.body);
   try {
-    // Verify the payment signature
+    // Capture the payment
     const razorpay = new Razorpay({
       key_id: 'rzp_test_Tiv5oHxAC3kTlH',
-      key_secret: 'oCleWUV3s6qvUbqTsWSB0C89',
+      key_secret: 'oCleWUV3s6qvUbqTsWSB0C89'
     });
-
-    const generatedSignature = razorpay.webhook.generateDigest(
-      JSON.stringify(req.body),
-      process.env.RAZORPAY_TEST_WEBHOOK_SECRET
-    );
-
-    if (generatedSignature !== signature)
-      return res.status(400).json({ error: 'Invalid signature' });
-
-    // Capture the payment
-    const payment = await razorpay.payments.capture(paymentId);
+    const payment = await razorpay.payments.fetch(paymentId);
 
     // Update the order status
     const order = await Order.findOne({ paymentId });
     if (!order) return res.status(404).json({ error: 'Order not found' });
-      console.log('order======>' , order);
-    order.status = 'PAID';
-    const savedOrder = await order.save();
 
-    res.json({ orderId: savedOrder._id, status: savedOrder.status });
+    if (payment.status === 'captured') {
+      order.status = 'PAID';
+      const savedOrder = await order.save();
+      res.json({ orderId: savedOrder._id, status: savedOrder.status });
+    } else {
+      res.json({ status: payment.status });
+    }
   } catch (error) {
-    console.error(error);
+    console.error('Update order error=======>' , error);
     res.status(500).json({ error: 'Unable to update order' });
   }
 };
 
 
+//get orders api
+
+
+exports.getOrders = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    let Myorders;
+    if (userId) {
+      Myorders = await Order.find({ userId });
+    } else {
+      return res.status(400).send('Please provide either userId or sellerId');
+    }
+
+    if (Myorders.length === 0) {
+      return res.status(404).send('Orders not found');
+    }
+
+    res.status(200).send(Myorders);
+  } catch (error) {
+    console.log('getOrders error=====>', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
 
 

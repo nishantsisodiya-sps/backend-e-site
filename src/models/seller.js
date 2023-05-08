@@ -33,8 +33,8 @@ sellerSchema.pre('save', async function (next) {
 
 sellerSchema.methods.generateAuthToken = async function () {
   try {
-    const token = jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
+    const token = jwt.sign({ id: this._id, role: this.role , email : this.email , name : this.name }, process.env.JWT_SECRET, {
+      expiresIn: '1d',
     });
     this.tokens = this.tokens.concat({token});
      await this.save();

@@ -22,10 +22,16 @@ const OrderSchema = new mongoose.Schema({
   paymentId: {
     type: String,
     required: true
-  }
-}, {
-  timestamps: true
-});
+  },
+  products:
+    [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'product'
+    }],
+},
+  {
+    timestamps: true
+  });
 
 const Order = mongoose.model('Order', OrderSchema);
 

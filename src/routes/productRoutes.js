@@ -37,4 +37,7 @@ router.delete('/:id',
 authMiddleware.authenticateSeller,
 productController.deleteProduct)
 
+
+// router.get('/search', productController.searchProducts)
+
 module.exports = router;
