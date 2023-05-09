@@ -3,12 +3,13 @@ dotenv.config();
 const Order = require('../models/order');
 const Razorpay = require('razorpay');
 const { v4: uuidv4 } = require('uuid');
+const Product = require('../models/products')
 // const { default: orders } = require('razorpay/dist/types/orders');
 
 // Create a new order
 
 exports.createOrder = async (req, res) => {
-  const { userId, address, amount , products} = req.body;
+  const { name, userId, address, amount , products} = req.body;
   try {
     const razorpay = new Razorpay({
       key_id: 'rzp_test_Tiv5oHxAC3kTlH',
@@ -32,6 +33,7 @@ exports.createOrder = async (req, res) => {
     const order = await razorpay.orders.create(options);
     // Create order in our database
     const newOrder = new Order({
+      name : name,
       userId: userId,
       address: address,
       amount: amount,
@@ -105,4 +107,48 @@ exports.getOrders = async (req, res) => {
 
 
 
+exports.getSingleOrder = async function (req, res) {
+  try {
+    const { id } = req.params;
+   
+
+    const order = await Order.findById(id).populate('products');
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const orderWithProductDetails = {
+      id: order._id,
+      name : order.name,
+      userId: order.userId,
+      address: order.address,
+      amount: order.amount,
+      status: order.status,
+      paymentId: order.paymentId,
+        products: await Promise.all(order.products.map(async (productId) => {
+          const product = await Product.findById(productId);
+          console.log('product====>' , product);
+          return {
+            id: product._id,
+            title: product.title,
+            description: product.description,
+            price: product.price,
+            thumbnail: product.thumbnail,
+            rating: product.rating,
+            discountPercentage: product.discountPercentage,
+            stock: product.stock,
+            images: product.images,
+            brand: product.brand,
+            category: product.category,
+            quantity : product.quantity
+          };
+        })),
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+      };
+      res.status(200).json(orderWithProductDetails);
+    } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 

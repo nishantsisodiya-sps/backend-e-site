@@ -72,7 +72,8 @@ exports.getCart = async (req, res) => {
           stock: productInfo.stock,
           images: productInfo.images,
           brand: productInfo.brand,
-          category: productInfo.category
+          category: productInfo.category,
+          quantity : cartItem.quantity
         },
       };
     }));

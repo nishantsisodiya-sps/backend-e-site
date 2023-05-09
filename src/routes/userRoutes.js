@@ -11,7 +11,7 @@ router.post('/login', userController.loginUser);
 
 // Get user profile
 router.get('/profile/:id', 
-authMiddleware.authenticateUser,
+// authMiddleware.authenticateUser,
  userController.getProfile);
 
 module.exports = router;
