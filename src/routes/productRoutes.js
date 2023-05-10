@@ -9,6 +9,8 @@ const router = express.Router();
 // Get all products
 router.get('/', productController.getProducts);
 
+router.get('/search', productController.searchProduct)
+
 // Get single product by ID
 router.get('/:id', productController.getSingleProduct);
 
@@ -38,6 +40,5 @@ authMiddleware.authenticateSeller,
 productController.deleteProduct)
 
 
-// router.get('/search', productController.searchProducts)
 
 module.exports = router;

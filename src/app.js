@@ -8,6 +8,7 @@ const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes')
+const supportRoutes = require('./routes/supportRoutes')
 const path = require('path');
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
@@ -21,7 +22,7 @@ app.use('/users', userRoutes);
 app.use('/products', productRoutes);
 app.use('/cart', cartRoutes);
 app.use('/order' , orderRoutes)
-
+app.use('/support' , supportRoutes)
 
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

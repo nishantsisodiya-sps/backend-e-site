@@ -127,7 +127,6 @@ exports.getSingleOrder = async function (req, res) {
       paymentId: order.paymentId,
         products: await Promise.all(order.products.map(async (productId) => {
           const product = await Product.findById(productId);
-          console.log('product====>' , product);
           return {
             id: product._id,
             title: product.title,

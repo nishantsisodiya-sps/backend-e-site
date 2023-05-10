@@ -2,6 +2,7 @@ const Seller = require('../models/seller');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const seller = require('../models/seller');
+const products = require('../models/products')
 
 // Register a new seller
 exports.registerSeller = async (req, res) => {
@@ -80,3 +81,6 @@ exports.getProfile = async (req, res) => {
     return res.status(500).json({ error: 'Server Error' });
   }
 };
+
+
+
