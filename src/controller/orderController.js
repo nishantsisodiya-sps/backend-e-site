@@ -31,6 +31,7 @@ exports.createOrder = async (req, res) => {
     
     // Create order in Razorpay
     const order = await razorpay.orders.create(options);
+
     // Create order in our database
     const newOrder = new Order({
       name : name,
@@ -54,6 +55,7 @@ exports.createOrder = async (req, res) => {
 // Update an order
 exports.updateOrder = async (req, res) => {
   const { paymentId } = req.body;
+
   try {
     // Capture the payment
     const razorpay = new Razorpay({
@@ -61,19 +63,23 @@ exports.updateOrder = async (req, res) => {
       key_secret: 'oCleWUV3s6qvUbqTsWSB0C89'
     });
     const payment = await razorpay.payments.fetch(paymentId);
-    console.log(payment);
+ 
+    const id = payment.order_id
+  
     // Update the order status
-    const order = await Order.findOne({ paymentId });
+    const order = await Order.findOne({paymentId: id });
+
     if (!order) return res.status(404).json({ error: 'Order not found' });
 
     if (payment.status === 'captured') {
       order.status = 'PAID';
       const savedOrder = await order.save();
+
       res.json({ orderId: savedOrder._id, status: savedOrder.status });
     } else {
       res.json({ status: payment.status });
     }
-  } catch (error) {
+  } catch (error) {       
     console.error('Update order error=======>' , error);
     res.status(500).json({ error: 'Unable to update order' });
   }

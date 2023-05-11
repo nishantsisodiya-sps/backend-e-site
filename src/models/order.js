@@ -11,10 +11,6 @@ const OrderSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    validate: {
-      validator: validator.isAlpha,
-      message: 'Name can only contain letters'
-    }
   },
   address: {
     type: String,
@@ -26,7 +22,7 @@ const OrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['placed', 'shipped', 'delivered'],
+    enum: ['placed', 'PAID', 'shipped', 'delivered'],
     default: 'placed'
   },
   paymentId: {
