@@ -1,18 +1,59 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const validator = require('validator')
+const { isAlpha } = require('validator');
 
 const sellerSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true , lowercase: true},
-  password: { type: String, required: true },
-  phone: { type: String, required: true },
+  name: {
+    type: String,
+    required: true,
+    validate: {
+      validator: (name) => isAlpha(name),
+      message: 'Name should only contain alphabetic characters'
+    }
+  },
+
+
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    validate: {
+      validator: validator.isEmail,
+      message: 'Invalid email address'
+    }
+  },
+
+
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
+
+
+  phone: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function (v) {
+        return validator.isMobilePhone(v, ['en-IN']);
+      },
+      message: props => `${props.value} is not a valid phone number!`
+    }
+  },
 
   role: { type: String, enum: ['seller'], default: 'seller' },
+
+
   createdAt: {
     type: Date,
     default: Date.now
   },
+
+
   tokens: [{
     token: { type: String, required: true }
   }]
@@ -33,16 +74,16 @@ sellerSchema.pre('save', async function (next) {
 
 sellerSchema.methods.generateAuthToken = async function () {
   try {
-    const token = jwt.sign({ id: this._id, role: this.role , email : this.email , name : this.name }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: this._id, role: this.role, email: this.email, name: this.name }, process.env.JWT_SECRET, {
       expiresIn: '1d',
     });
-    this.tokens = this.tokens.concat({token});
-     await this.save();
-    return token; 
+    this.tokens = this.tokens.concat({ token });
+    await this.save();
+    return token;
   } catch (error) {
     console.log(error);
   }
-  
+
 };
 
 module.exports = mongoose.model('Seller', sellerSchema);

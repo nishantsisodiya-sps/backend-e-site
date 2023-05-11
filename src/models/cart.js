@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator')
 
 const cartItemSchema = new mongoose.Schema({
   product: {
@@ -14,12 +15,10 @@ const cartItemSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    // required: true
   },
   seller : {
     type : mongoose.Schema.Types.ObjectId,
     ref : 'Seller',
-    // required : true
   }
 });
 

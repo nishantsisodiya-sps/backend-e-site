@@ -3,13 +3,19 @@ const productController = require('../controller/productController');
 const authMiddleware = require('../middleware/authMiddleware');
 const verifySeller = require('../middleware/verifySeller');
 const uploadMiddleware = require('../middleware/uploadMiddleware');
-
+const categoryController = require('../controller/categoryController')
 const router = express.Router();
 
 // Get all products
 router.get('/', productController.getProducts);
 
 router.get('/search', productController.searchProduct)
+
+router.get('/categories' , categoryController.getAllCategories)
+
+
+
+router.get('/category/:category' , categoryController.getProductsByCategory)
 
 // Get single product by ID
 router.get('/:id', productController.getSingleProduct);
@@ -38,6 +44,8 @@ productController.updateProduct)
 router.delete('/:id',
 authMiddleware.authenticateSeller,
 productController.deleteProduct)
+
+
 
 
 

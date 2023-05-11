@@ -1,12 +1,35 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const validator = require('validator')
+const { isAlpha } = require('validator');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true , lowercase: true },
+  name: {
+    type: String,
+    required: true,
+    validate: {
+      validator: (name) => isAlpha(name),
+      message: 'Name should only contain alphabetic characters'
+    }
+  },
+  email: {
+    type: String, required: true, unique: true, lowercase: true, validate: {
+      validator: validator.isEmail,
+      message: 'Invalid email address'
+    }
+  },
   password: { type: String, required: true },
-  phone: { type: Number, required: true },
+  phone: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function (v) {
+        return validator.isMobilePhone(v, ['en-IN']);
+      },
+      message: props => `${props.value} is not a valid phone number!`
+    }
+  },
   role: { type: String, enum: ['user', 'seller', 'superAdmin'], default: 'user' },
   createdAt: {
     type: Date,
@@ -30,9 +53,9 @@ userSchema.pre('save', async function (next) {
 });
 
 
-userSchema.methods.generateAuthToken =async function () {
+userSchema.methods.generateAuthToken = async function () {
   try {
-    const token = jwt.sign({ id: this._id, role: this.role , email : this.email , name : this.name }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: this._id, role: this.role, email: this.email, name: this.name }, process.env.JWT_SECRET, {
       expiresIn: '1d',
     })
     this.tokens = this.tokens.concat({ token })

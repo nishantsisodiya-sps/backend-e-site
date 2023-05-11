@@ -1,15 +1,29 @@
 const mongoose = require('mongoose');
+const validator = require('validator')
+const { isAlpha } = require('validator');
 
 const superAdminSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    validate: {
+      validator: (value) => validator.isAlpha(value),
+      message: 'Name should only contain letters'
+    }
   },
+
+
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    validate: {
+      validator: validator.isEmail,
+      message: 'Invalid email address'
+    }
   },
+
+
   password: {
     type: String,
     required: true

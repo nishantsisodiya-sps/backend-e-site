@@ -68,7 +68,6 @@ exports.loginUser = async (req, res) => {
 
 
 
-
 exports.getProfile = async (req, res, next) => {
   try {
     const userId = req.params.id

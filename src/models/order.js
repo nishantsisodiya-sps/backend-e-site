@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const validator = require('validator')
+const { isAlpha } = require('validator');
 
 const OrderSchema = new mongoose.Schema({
   userId: {
@@ -6,9 +8,13 @@ const OrderSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  name : {
-    type : String,
-    required : true
+  name: {
+    type: String,
+    required: true,
+    validate: {
+      validator: validator.isAlpha,
+      message: 'Name can only contain letters'
+    }
   },
   address: {
     type: String,

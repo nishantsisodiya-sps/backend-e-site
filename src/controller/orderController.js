@@ -54,7 +54,6 @@ exports.createOrder = async (req, res) => {
 // Update an order
 exports.updateOrder = async (req, res) => {
   const { paymentId } = req.body;
-  console.log('id==>' , req.body);
   try {
     // Capture the payment
     const razorpay = new Razorpay({
@@ -62,7 +61,7 @@ exports.updateOrder = async (req, res) => {
       key_secret: 'oCleWUV3s6qvUbqTsWSB0C89'
     });
     const payment = await razorpay.payments.fetch(paymentId);
-
+    console.log(payment);
     // Update the order status
     const order = await Order.findOne({ paymentId });
     if (!order) return res.status(404).json({ error: 'Order not found' });

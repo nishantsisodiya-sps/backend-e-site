@@ -1,36 +1,34 @@
-const support = require('../models/support')
+const contactUs = require('../models/support')
 
 
-exports.contactus = async (req , res)=>{
-    const {userId , sellerId , name , email , message} = req.body;
-    console.log(name);
+exports.contactus = async (req , res) => {
+    const {userId, sellerId, name, email, message} = req.body;
+    console.log(sellerId , userId);
+
     try {
-        if(userId){
-             contactForm = new support ({
+        if (userId) {
+            const contactForm = new contactUs({
                 userId,
-                name ,
-                email ,
+                name,
+                email,
                 message
             });
-            
-        }
-        else if (sellerId){
-             contactForm = new support ({
+            await contactForm.save();
+        } else if (sellerId) {
+            const contactForm = new contactUs({
                 sellerId,
-                name ,
-                email ,
+                name,
+                email,
                 message
             });
-        }
-        else{
+            await contactForm.save();
+        } else {
             throw new Error('userId or sellerId is required');
         }
         
-        await contactForm.save()
         res.status(201).json("message sent successfully");
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-
 }
