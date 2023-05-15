@@ -3,7 +3,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 
-// Handle user login
+//<<<<<<<======================  HANDLE USER LOGIN API ================>>>>>>>>
+
+
 exports.login = function (req, res) {
     // Check if there are any validation errors
     const errors = validationResult(req);
@@ -36,7 +38,10 @@ exports.login = function (req, res) {
     });
 };
 
-// Handle user registration
+
+//<<<<<<<====================== HANDLE USER REGISTRATION API ================>>>>>>>>
+
+
 exports.register = function (req, res) {
     // Check if there are any validation errors
     const errors = validationResult(req);

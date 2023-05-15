@@ -61,13 +61,14 @@ const productSchema = new mongoose.Schema({
     }
   },
   category: {
-    type: String,
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ProductCategory',
     validate: {
-      validator: (value) => {
-        return validator.isLength(value, { min: 2, max: 50 });
+      validator: async function(v) {
+        const category = await mongoose.model('ProductCategory').findById(v);
+        return category !== null;
       },
-      message: 'Category must be between 2 and 50 characters'
+      message: 'Category is invalid'
     }
   },
   seller : {

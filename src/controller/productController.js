@@ -3,6 +3,10 @@ const products = require('../models/products');
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose')
 
+
+//<<<<<<<====================== ADD PRODUCTS API ================>>>>>>>>
+
+
 exports.addProduct = async (req, res) => {
   // Validate the request body
   const thumbnail = req.files['thumbnail'][0].filename;
@@ -13,9 +17,11 @@ exports.addProduct = async (req, res) => {
   const discountPercentage = req.body.discountPercentage
   const rating = req.body.rating
   const stock = req.body.stock
-  const category = req.body.category
+  const category = new mongoose.Types.ObjectId(req.body.category)
   const brand = req.body.brand
   const seller = req.seller._id
+  
+  console.log(category);
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -51,6 +57,8 @@ exports.addProduct = async (req, res) => {
 }
 
 
+//<<<<<<<======================  GET PRODUCT API ================>>>>>>>>
+
 
 exports.getProducts = async function (req, res, next) {
 
@@ -78,7 +86,7 @@ exports.getProducts = async function (req, res, next) {
 }
 
 
-
+//<<<<<<<======================  FETCH PRODUCT BY SELLER ID API ================>>>>>>>>
 
 exports.getSellerProducts = async function (req, res, next) {
   const seller = req.params.sellerId;
@@ -95,6 +103,8 @@ exports.getSellerProducts = async function (req, res, next) {
   }
 };
 
+
+//<<<<<<<======================  GET SINGLE PRODUCT API ================>>>>>>>>
 
 exports.getSingleProduct = async function (req, res, next) {
   try {
@@ -114,7 +124,7 @@ exports.getSingleProduct = async function (req, res, next) {
 }
 
 
-//Delete Product Api
+//<<<<<<<======================  DELETE PRODUCT API ================>>>>>>>>
 
 
 exports.deleteProduct = async function (req, res, next) {
@@ -141,7 +151,9 @@ exports.deleteProduct = async function (req, res, next) {
 }
 
 
-// Update product API 
+//<<<<<<<======================  UPDATE PRODUCT API ================>>>>>>>>
+
+
 exports.updateProduct = async function (req, res) {
   try {
     console.log('file =========>', req.files.thumbnail[`filename`]);
@@ -171,8 +183,6 @@ exports.updateProduct = async function (req, res) {
       { new: true }
     );
 
-    // console.log(updatedProduct);
-
     res.status(200).json({ message: 'Product Updated successfully', product: updatedProduct });
   } catch (error) {
     console.log('Update product error ===>', error);
@@ -183,7 +193,10 @@ exports.updateProduct = async function (req, res) {
 
 
 
-//search product 
+
+//<<<<<<<======================search product ================>>>>>>>>
+
+
 
 exports.searchProduct = async (req, res) => {
 

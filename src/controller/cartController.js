@@ -1,7 +1,7 @@
 const Cart = require('../models/cart');
 const Product = require('../models/products')
 
-// Add products to Cart
+//<<<<<<<======================  ADD PRODUCTS TO CART API ================>>>>>>>>
 
 exports.addToCart = async (req, res) => {
   try {
@@ -40,8 +40,7 @@ exports.addToCart = async (req, res) => {
 
 
 
-
-//Get Cart products for specific user id
+//<<<<<<<======================  GET PRODUCT OF SPECIFIC ID API ================>>>>>>>>
 
 exports.getCart = async (req, res) => {
   try {
@@ -56,8 +55,14 @@ exports.getCart = async (req, res) => {
     }
 
     const cartItemsWithProductInfo = await Promise.all(cartItems.map(async (cartItem) => {
+      console.log(cartItem);
       const { product, quantity } = cartItem;
       const productInfo = await Product.findById(product);
+
+      if (!productInfo) {
+        return null; // Skip this cart item if the associated product is not found
+      }
+
       return {
         id: cartItem._id,
         quantity,
@@ -77,13 +82,15 @@ exports.getCart = async (req, res) => {
         },
       };
     }));
+    
+    const filteredCartItems = cartItemsWithProductInfo.filter(item => item !== null);
 
-    res.status(200).json(cartItemsWithProductInfo);
+    res.status(200).json(filteredCartItems);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // Delete products from cart 
 

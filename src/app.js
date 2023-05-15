@@ -9,6 +9,7 @@ const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes')
 const supportRoutes = require('./routes/supportRoutes')
+const categoryRoutes = require('./routes/categoryRoutes')
 const path = require('path');
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
@@ -21,8 +22,9 @@ app.use('/sellers', sellerRoutes);
 app.use('/users', userRoutes);
 app.use('/products', productRoutes);
 app.use('/cart', cartRoutes);
-app.use('/order' , orderRoutes)
-app.use('/support' , supportRoutes)
+app.use('/order' , orderRoutes);
+app.use('/support' , supportRoutes);
+app.use('/category' , categoryRoutes)
 
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -41,6 +43,6 @@ mongoose.connect('mongodb+srv://nishantsisodiya:W9Ts90851N3QErRE@ecommcluster.du
 
 
 // Start the server
-app.listen(process.env.PORT || 2800, () => {
-  console.log('Server started on port 2800');
+app.listen(process.env.PORT || 3838, () => {
+  console.log('Server started on port 3838');
 })
