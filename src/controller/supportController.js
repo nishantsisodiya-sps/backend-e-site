@@ -3,7 +3,7 @@ const contactUs = require('../models/support')
 
 exports.contactus = async (req , res) => {
     const {userId, sellerId, name, email, message} = req.body;
-    console.log(sellerId , userId);
+  
 
     try {
         if (userId) {

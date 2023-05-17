@@ -6,7 +6,6 @@ const Product = require('../models/products')
 exports.addToCart = async (req, res) => {
   try {
     const { user, product, quantity, seller } = req.body;
-    console.log(seller);
 
     // Check if the product is already in the user's cart
     let existingCartItem;
@@ -55,10 +54,10 @@ exports.getCart = async (req, res) => {
     }
 
     const cartItemsWithProductInfo = await Promise.all(cartItems.map(async (cartItem) => {
-      console.log(cartItem);
+
       const { product, quantity } = cartItem;
       const productInfo = await Product.findById(product);
-      console.log(productInfo);
+  
       if (!productInfo) {
         return null; // Skip this cart item if the associated product is not found
       }
@@ -99,11 +98,11 @@ exports.getCart = async (req, res) => {
 exports.removeFromCart = async (req, res) => {
   try {
     const itemId = req.params.cartItemId;
-    console.log(itemId);
+
 
     // Find the cart item with the given id
     const cartItem = await Cart.findById(itemId);
-    console.log('cartitem==>' , cartItem);
+
 
     if (!cartItem) {
       throw new Error('Cart item not found');

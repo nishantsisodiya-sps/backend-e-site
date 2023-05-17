@@ -3,7 +3,7 @@ const Product = require('../models/products')
 
 // Create and Save a new Product Category
 exports.create = async (req, res) => {
-  console.log(req.body.name);
+
   try {
     console.log("Creating a new product category...");
 

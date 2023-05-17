@@ -85,48 +85,6 @@ exports.getProfile = async (req, res) => {
 
 
 
-// exports.getSoldProducts = async (req, res) => {
-//   try {
-//     const sellerId = req.params.sellerId;
-
-//     // Retrieve sold products information for the seller
-//     const soldProducts = await Order.aggregate([
-//       {
-//         $match: {
-//           'products.seller':new mongoose.Types.ObjectId(sellerId),
-//           status: { $in: ['PAID', 'shipped', 'delivered'] }
-//         }
-//       },
-//       {
-//         $unwind: '$products'
-//       },
-//       {
-//         $group: {
-//           _id: '$products.product',
-//           quantitySold: { $sum: '$products.quantity' }
-//         }
-//       },
-//       {
-//         $lookup: {
-//           from: 'products',
-//           localField: '_id',
-//           foreignField: '_id',
-//           as: 'product'
-//         }
-//       },
-//       {
-//         $unwind: '$product'
-//       }
-//     ]);
-
-//     res.json({ soldProducts });
-//   } catch (error) {
-//     console.error('Get sold products error:', error);
-//     res.status(500).json({ error: 'Unable to fetch sold products' });
-//   }
-// };
-
-
 
 exports.getSoldProducts = async (req, res) => {
   try {
@@ -172,7 +130,7 @@ exports.getSoldProducts = async (req, res) => {
       }
     ]);
 
-    res.json({ soldProducts });
+    res.json( soldProducts);
   } catch (error) {
     console.error('Get sold products error:', error);
     res.status(500).json({ error: 'Unable to fetch sold products' });

@@ -124,6 +124,7 @@ exports.getOrders = async (req, res) => {
     let Myorders;
     if (userId) {
       Myorders = await Order.find({ userId });
+      
     } else {
       return res.status(400).send('Please provide either userId or sellerId');
     }

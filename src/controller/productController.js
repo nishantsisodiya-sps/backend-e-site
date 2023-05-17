@@ -21,7 +21,7 @@ exports.addProduct = async (req, res) => {
   const brand = req.body.brand
   const seller = req.seller._id
   
-  console.log(category);
+ 
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -109,6 +109,7 @@ exports.getSellerProducts = async function (req, res, next) {
 exports.getSingleProduct = async function (req, res, next) {
   try {
     const productId = req.params.id;
+    console.log(productId);
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(404).send('Invalid product ID');
     }
@@ -134,7 +135,7 @@ exports.deleteProduct = async function (req, res, next) {
     const productId = req.params.id;
 
     const Product = await products.findOne({ _id: productId, seller: sellerId })
-    console.log(Product);
+   
     if (!Product) {
       return res.status(404).json({ message: 'Product Not Found' })
     }
@@ -156,7 +157,7 @@ exports.deleteProduct = async function (req, res, next) {
 
 exports.updateProduct = async function (req, res) {
   try {
-    console.log('file =========>', req.files.thumbnail[`filename`]);
+  
     const sellerId = req.seller._id;
     const productId = req.params.id;
 
