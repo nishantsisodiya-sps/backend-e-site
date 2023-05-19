@@ -92,8 +92,8 @@ exports.getCart = async (req, res) => {
   }
 };
 
-// Delete products from cart 
-
+ 
+//<<<<<<<======================  Delete products from cart ================>>>>>>>>
 
 exports.removeFromCart = async (req, res) => {
   try {
@@ -113,6 +113,33 @@ exports.removeFromCart = async (req, res) => {
     
 
     res.status(200).json({ message: 'Product removed from cart successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+//<<<<<<<======================  update the quantity of products from cart ================>>>>>>>>
+
+exports.updateCartItem = async (req, res) => {
+ 
+  try {
+    const quantity = req.body.quantity
+    const cartItemId = req.params.cartItemId
+
+    // Find the cart item with the given id
+    const cartItem = await Cart.findById(cartItemId);
+
+    if (!cartItem) {
+      throw new Error('Cart item not found');
+    }
+
+    // Update the quantity
+    cartItem.quantity = quantity;
+    await cartItem.save();
+
+    res.status(200).json({ message: 'Cart item quantity updated successfully' });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
