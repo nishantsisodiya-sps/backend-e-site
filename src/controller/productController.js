@@ -109,7 +109,6 @@ exports.getSellerProducts = async function (req, res, next) {
 exports.getSingleProduct = async function (req, res, next) {
   try {
     const productId = req.params.id;
-    console.log(productId);
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(404).send('Invalid product ID');
     }
