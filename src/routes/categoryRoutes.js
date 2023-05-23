@@ -12,13 +12,13 @@ router.get('/:productCategoryId', productCategories.getProductsByCategory);
 router.post('/productCategories', productCategories.create);
   
   
-    // Retrieve a single Product Category with productCategoryId
+// Retrieve a single Product Category with productCategoryId
 router.get('/productCategories/:productCategoryId', productCategories.findOne);
   
-    // Update a Product Category with productCategoryId
+// Update a Product Category with productCategoryId
 router.put('/productCategories/:productCategoryId', productCategories.update);
   
-    // Delete a Product Category with productCategoryId
+// Delete a Product Category with productCategoryId
 router.delete('/productCategories/:productCategoryId', productCategories.delete);
 
 

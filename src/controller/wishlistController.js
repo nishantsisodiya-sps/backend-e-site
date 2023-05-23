@@ -67,9 +67,9 @@ exports.GetWishList = async (req, res) => {
 
 
 exports.deleteProductFromWishlist = async (req, res) => {
+  console.log(req);
   try {
     const productId = req.params.id;
-    console.log(req);
     const userId = req.user._id;
 
     const wishlist = await Wishlist.findOneAndUpdate(
@@ -85,6 +85,6 @@ exports.deleteProductFromWishlist = async (req, res) => {
     res.status(200).json({ message: 'Product removed from wishlist' });
   } catch (error) {
     console.log('Delete from Wishlist', error);
-    res.status(500).json({ error: error });
+    res.status(500).json({ error: error.message });
   }
 };

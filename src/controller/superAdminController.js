@@ -13,21 +13,20 @@ exports.registerSuperAdmin = async (req, res) => {
       return res.status(400).json({ message: 'Super admin already exists' });
     }
 
-    // Hash password and create super admin
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Create a new super admin
 
     const newSuperAdmin = new SuperAdmin({
       username,
       email,
-      password: hashedPassword
+      password,
+      token : []
     });
 
     await newSuperAdmin.save();
 
-    // Generate JWT token and return it to the client
-    const token = jwt.sign({ id: newSuperAdmin._id }, process.env.JWT_SECRET);
-    res.status(201).json({ token , });
+    const authToken = await newSuperAdmin.generateAuthToken()
+
+    res.status(201).json({ token : authToken , success : true , message : "Sign in as Super Admin" });
   } catch (err) {
     console.error(err);
     res.status(500).send();
@@ -51,9 +50,10 @@ exports.loginSuperAdmin = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Generate JWT token and return it to the client
-    const token = jwt.sign({ id: existingSuperAdmin._id }, process.env.JWT_SECRET);
-    res.status(200).json({ token , });
+   // Generate auth token
+   const authToken = await existingSuperAdmin.generateAuthToken()
+   res.status(200).json({ token : authToken , success : true , message : "Sign in as Super Admin" });
+
   } catch (err) {
     console.error(err);
     res.status(500).send();

@@ -16,29 +16,29 @@ router.get('/search', productController.searchProduct)
 router.get('/:id', productController.getSingleProduct);
 
 // Add a new product
-router.post('/add', 
-  authMiddleware.authenticateSeller, 
-  verifySeller, 
-uploadMiddleware.upload,
+router.post('/add',
+  authMiddleware.authenticateSeller,
+  verifySeller,
+  uploadMiddleware.upload,
   productController.addProduct
 );
 
 
 // Get all products of a seller
-router.get('/seller/:sellerId', 
-authMiddleware.authenticateSeller,
- productController.getSellerProducts);
+router.get('/seller/:sellerId',
+  authMiddleware.authenticateSeller,
+  productController.getSellerProducts);
 
 
 router.patch('/:id',
-authMiddleware.authenticateSeller,
-uploadMiddleware.upload,
-productController.updateProduct)
+  authMiddleware.authenticateSeller,
+  uploadMiddleware.upload,
+  productController.updateProduct)
 
 
 router.delete('/:id',
-authMiddleware.authenticateSeller,
-productController.deleteProduct)
+  authMiddleware.authenticateSeller,
+  productController.deleteProduct)
 
 
 

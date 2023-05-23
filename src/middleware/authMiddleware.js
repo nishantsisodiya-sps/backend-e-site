@@ -37,4 +37,38 @@ const authenticateUser = async (req, res, next) => {
   }
 };
 
-module.exports = { authenticateSeller, authenticateUser };
+
+
+
+const checkLoggedIn = async(req, res, next) => {
+  try {
+    const token = req.header('Authorization').replace('Bearer ', '');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if the token belongs to a seller
+    const seller = await Seller.findOne({ id: decoded._id, 'tokens.token': token });
+    if (seller) {
+      req.token = token;
+      req.seller = seller;
+      return next();
+    }
+
+    // Check if the token belongs to a user
+    const user = await User.findOne({ id: decoded._id, 'tokens.token': token });
+    if (user) {
+      req.token = token;
+      req.user = user;
+      return next();
+    }
+
+    throw new Error();
+  } catch (e) {
+    res.status(401).send({ error: 'Please authenticate.' });
+  }
+};
+
+
+
+
+
+module.exports = { authenticateSeller, authenticateUser , checkLoggedIn};

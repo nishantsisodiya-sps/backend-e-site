@@ -120,6 +120,29 @@ exports.removeFromCart = async (req, res) => {
 };
 
 
+
+//<<<<<<<======================  Delete all products from cart ================>>>>>>>>
+
+
+exports.deleteAllProductsFromCart = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const cartItems = await Cart.deleteMany({ user: userId });
+
+    if (cartItems.deletedCount === 0) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+
+    res.status(200).json({ message: 'Cart deleted successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
 //<<<<<<<======================  update the quantity of products from cart ================>>>>>>>>
 
 exports.updateCartItem = async (req, res) => {
