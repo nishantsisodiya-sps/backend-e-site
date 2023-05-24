@@ -70,8 +70,8 @@ exports.loginUser = async (req, res) => {
 
 exports.getProfile = async (req, res, next) => {
   try {
-    const userId = req.params.id
-    const user = await User.findById(userId)
+    const userId = req.params.id;
+    const user = await User.findById(userId).select('-password -tokens');
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }

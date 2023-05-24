@@ -1,7 +1,12 @@
 const ProductCategory = require('../models/categories');
 const Product = require('../models/products')
 
-// Create and Save a new Product Category
+
+
+//<<<<<<<======================  CREATE AND SAVE A NEW PRODUCT CATEGORY ================>>>>>>>>
+
+
+
 exports.create = async (req, res) => {
 
   try {
@@ -36,9 +41,9 @@ exports.create = async (req, res) => {
 
 
 
+//<<<<<<<====================== RETURN ALL PRODUCTS CATEGORIES FROM THE DATABASE ================>>>>>>>>
 
 
-// Retrieve and return all Product Categories from the database.
 exports.findAll = async (req, res) => {
   try {
     const productCategories = await ProductCategory.find();
@@ -51,7 +56,9 @@ exports.findAll = async (req, res) => {
 };
 
 
-// Find a single Product Category with a productCategoryId
+//<<<<<<<====================== FIND A SINGLE PRODUCT CATEGORY WITH A PRODUCT CATEGORY ID ================>>>>>>>>
+
+
 exports.findOne = (req, res) => {
   ProductCategory.findById(req.params.productCategoryId)
     .then(productCategory => {
@@ -72,6 +79,8 @@ exports.findOne = (req, res) => {
       });
     });
 };
+
+
 
 
 

@@ -142,53 +142,6 @@ exports.getOrders = async (req, res) => {
 
 
 
-// exports.getSingleOrder = async function (req, res) {
-//   try {
-//     const id = req.params.id;
-//     console.log(id);
-   
-
-//     const order = await Order.findById(id).populate('products');
-//     console.log(order);
-//     if (!order) {
-//       return res.status(404).json({ message: 'Order not found' });
-//     }
-
-//     const orderWithProductDetails = {
-//       id: order._id,
-//       name : order.name,
-//       userId: order.userId,
-//       address: order.address,
-//       amount: order.amount,
-//       status: order.status,
-//       paymentId: order.paymentId,
-//         products: await Promise.all(order.products.map(async (productId) => {
-//           const product = await Product.findById(productId);
-//           return {
-//             id: product._id,
-//             title: product.title,
-//             description: product.description,
-//             price: product.price,
-//             thumbnail: product.thumbnail,
-//             rating: product.rating,
-//             discountPercentage: product.discountPercentage,
-//             stock: product.stock,
-//             images: product.images,
-//             brand: product.brand,
-//             category: product.category,
-//             quantity : product.quantity
-//           };
-//         })),
-//           createdAt: order.createdAt,
-//           updatedAt: order.updatedAt,
-//       };
-//       res.status(200).json(orderWithProductDetails);
-//     } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-
-
 
 exports.getSingleOrder = async function (req, res) {
   try {
