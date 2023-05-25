@@ -2,7 +2,7 @@ const uploadMiddleware = require('../middleware/uploadMiddleware');
 const products = require('../models/products');
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose')
-
+const Wishlist = require('../models/wishlist')
 
 //<<<<<<<====================== ADD PRODUCTS API ================>>>>>>>>
 
@@ -60,19 +60,57 @@ exports.addProduct = async (req, res) => {
 //<<<<<<<======================  GET PRODUCT API ================>>>>>>>>
 
 
-exports.getProducts = async function (req, res, next) {
+// exports.getProducts = async function (req, res, next) {
 
+//   try {
+//     const page = parseInt(req.query.page) || 1; // Getting the current page from the query parameters, default to 1
+//     const limit = 10; // Setting the limit of products per page to 10
+
+//     const count = await products.countDocuments(); //to Count the total number of products
+//     const totalPages = Math.ceil(count / limit); //to Calculate the total number of pages\
+
+
+//     const products1 = await products.find()
+//       .skip((page - 1) * limit) //to Skip the products that have been displayed in the previous pages
+//       .limit(limit); //to Limit the number of products to be displayed on this page
+
+//     res.status(200).json({
+//       totalPages: totalPages,
+//       currentPage: page,
+//       products: products1
+//     });
+//   } catch (error) {
+//     console.log('error:', error);
+//     res.status(500).json({ message: error.message });
+//   }
+// }
+
+
+
+
+
+exports.getProducts = async function (req, res, next) {
   try {
     const page = parseInt(req.query.page) || 1; // Getting the current page from the query parameters, default to 1
     const limit = 10; // Setting the limit of products per page to 10
 
-    const count = await products.countDocuments(); //to Count the total number of products
-    const totalPages = Math.ceil(count / limit); //to Calculate the total number of pages\
+    const count = await products.countDocuments(); // Count the total number of products
+    const totalPages = Math.ceil(count / limit); // Calculate the total number of pages
 
+    let products1 = await products.find()
+      .skip((page - 1) * limit) // Skip the products that have been displayed in the previous pages
+      .limit(limit); // Limit the number of products to be displayed on this page
 
-    const products1 = await products.find()
-      .skip((page - 1) * limit) //to Skip the products that have been displayed in the previous pages
-      .limit(limit); //to Limit the number of products to be displayed on this page
+    if (req.user) {
+      const userId = req.user._id;
+      const wishlist = await Wishlist.findOne({ userId: userId });
+
+      // Add the isWishlist field in the product details for each product
+      products1 = products1.map(product => {
+        const isProductInWishlist = wishlist && wishlist.products.includes(product._id);
+        return { ...product.toObject(), isWishlist: isProductInWishlist };
+      });
+    }
 
     res.status(200).json({
       totalPages: totalPages,
@@ -83,8 +121,7 @@ exports.getProducts = async function (req, res, next) {
     console.log('error:', error);
     res.status(500).json({ message: error.message });
   }
-}
-
+};
 
 //<<<<<<<======================  FETCH PRODUCT BY SELLER ID API ================>>>>>>>>
 
@@ -106,6 +143,24 @@ exports.getSellerProducts = async function (req, res, next) {
 
 //<<<<<<<======================  GET SINGLE PRODUCT API ================>>>>>>>>
 
+// exports.getSingleProduct = async function (req, res, next) {
+//   try {
+//     const productId = req.params.id;
+//     if (!mongoose.Types.ObjectId.isValid(productId)) {
+//       return res.status(404).send('Invalid product ID');
+//     }
+//     const product = await products.findById(productId);
+//     if (!product) {
+//       return res.status(404).send('Product not found');
+//     }
+//     res.send(product);
+//   } catch (error) {
+//     console.log('Get single product error', error);
+//     res.status(500).json({ message: error.message });
+//   }
+// }
+
+
 exports.getSingleProduct = async function (req, res, next) {
   try {
     const productId = req.params.id;
@@ -116,12 +171,26 @@ exports.getSingleProduct = async function (req, res, next) {
     if (!product) {
       return res.status(404).send('Product not found');
     }
+
+    if (req.user) {
+      // Check if the product is in the wishlist for the logged-in user
+      const userId = req.user._id; // Assuming you have user information available in the request
+      const wishlist = await Wishlist.findOne({ userId: userId });
+      const isProductInWishlist = wishlist && wishlist.products.includes(productId);
+      console.log(isProductInWishlist);
+
+      // Add the isWishlist field in the product details
+      product.isWishlist = isProductInWishlist;
+    }
+
     res.send(product);
   } catch (error) {
     console.log('Get single product error', error);
     res.status(500).json({ message: error.message });
   }
-}
+};
+
+
 
 
 //<<<<<<<======================  DELETE PRODUCT API ================>>>>>>>>

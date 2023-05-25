@@ -81,6 +81,12 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   images: [String],
+
+  isWishlist: {
+    type: Boolean,
+    default: false
+  }
+  
 });
 
 module.exports = mongoose.model('product', productSchema);
