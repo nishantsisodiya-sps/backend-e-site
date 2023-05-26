@@ -43,11 +43,13 @@ exports.addToCart = async (req, res) => {
 
 exports.getCart = async (req, res) => {
   try {
+   
     const { userId } = req.params;
-
+  
     const cartItems = await Cart.find({
       $or: [{ user: userId }, { seller: userId }]
     }).populate('product');
+    
 
     if (!cartItems) {
       return res.status(404).json({ message: 'Cart not found for the given user' });

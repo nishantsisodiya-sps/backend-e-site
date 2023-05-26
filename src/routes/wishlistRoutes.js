@@ -12,7 +12,7 @@ const { authenticateUser } = require('../middleware/authMiddleware');
 
 router.post('/add',authenticateUser , wishlistController.AddProductToWishlist)
  
-router.get('/:id' ,authenticateUser , wishlistController.GetWishList)
+router.get('/:id' ,authenticateUser , wishlistController.GetWishlist)
 
 router.delete('/:id',authenticateUser  , wishlistController.deleteProductFromWishlist)
 

@@ -4,7 +4,8 @@ const auth = require('../middleware/authMiddleware')
 const addressController = require('../controller/addressController')
 
 
-// Create Address
+router.get('/get', auth.checkLoggedIn, addressController.getAllAddresses);
+
 router.post('/add', auth.checkLoggedIn, addressController.createAddress);
 
 // Get Address by ID
@@ -17,9 +18,9 @@ router.put('/:id', auth.checkLoggedIn, addressController.updateAddressById);
 // Delete Address by ID
 router.delete('/:id', auth.checkLoggedIn, addressController.deleteAddressById);
 
+// Create Address
 
 //Get single address
-router.get('/get/:id', auth.checkLoggedIn, addressController.getAllAddresses);
 
 
 module.exports = router

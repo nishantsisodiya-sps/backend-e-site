@@ -38,6 +38,7 @@ exports.getAddressById = async (req, res) => {
     try {
       const addressId = req.params.id;
       const address = await Address.findById(addressId);
+    
   
       if (!address) {
         return res.status(404).json({ error: "Address not found" });
@@ -122,19 +123,22 @@ exports.updateAddressById = async (req, res) => {
 
 
   exports.getAllAddresses = async (req, res) => {
+   
     try {
-        const userId = req.user._id; // Assuming the user ID is available in req.user._id
-        const addresses = await Address.find({ userId });
-    
-        if (addresses.length === 0) {
-          return res.status(404).json({ error: "No addresses found for the user" });
-        }
-    
-        res.json(addresses);
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({
-          error: "Server error",
-        });
-      }
+      const userId = req.user._id;
+  
+      const addresses = await Address.find({ userId: userId });
+  
+      res.status(200).json({
+        message: "Addresses retrieved successfully",
+        addresses: addresses,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: "Server error",
+      });
+    }
   };
+  
+

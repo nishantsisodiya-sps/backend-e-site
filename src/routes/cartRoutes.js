@@ -4,7 +4,7 @@ const cartController = require('../controller/cartController');
 const authMiddleware = require('../middleware/authMiddleware')
 
 
-router.get('/:userId', authMiddleware.checkLoggedIn,
+router.get('/:userId',
     cartController.getCart);
 
 router.delete('/:cartItemId', authMiddleware.checkLoggedIn,

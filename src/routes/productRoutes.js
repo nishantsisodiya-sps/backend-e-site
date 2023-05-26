@@ -4,16 +4,17 @@ const authMiddleware = require('../middleware/authMiddleware');
 const verifySeller = require('../middleware/verifySeller');
 const uploadMiddleware = require('../middleware/uploadMiddleware');
 // const categoryController = require('../controller/categoryController')
+const checkToken = require('../middleware/checkerMiddleware')
 const router = express.Router();
 
 // Get all products
 router.get('/', productController.getProducts);
 
+
 router.get('/search', productController.searchProduct)
 
-
 // Get single product by ID
-router.get('/:id', productController.getSingleProduct);
+router.get('/:id', checkToken.checkToken , productController.getSingleProduct);
 
 // Add a new product
 router.post('/add',
