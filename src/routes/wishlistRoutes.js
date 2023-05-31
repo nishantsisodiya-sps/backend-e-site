@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const wishlistController = require('../controller/wishlistController')
 const { authenticateUser } = require('../middleware/authMiddleware');
-
+const checkLoggedIn = require('../middleware/checkerMiddleware')
 
 // router.post('/add',authenticateUser , wishlistController.addProductToWishlist)
  
@@ -10,11 +10,11 @@ const { authenticateUser } = require('../middleware/authMiddleware');
 
 // router.delete('/:id',authenticateUser  , wishlistController.deleteProductFromWishlist)
 
-router.post('/add',authenticateUser , wishlistController.AddProductToWishlist)
+router.post('/add',checkLoggedIn.checkToken , wishlistController.AddProductToWishlist)
  
-router.get('/:id' ,authenticateUser , wishlistController.GetWishlist)
+router.get('/:id' ,checkLoggedIn.checkToken , wishlistController.GetWishlist)
 
-router.delete('/:id',authenticateUser  , wishlistController.deleteProductFromWishlist)
+router.delete('/:id',checkLoggedIn.checkToken , wishlistController.deleteProductFromWishlist)
 
 
 

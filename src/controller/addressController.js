@@ -3,8 +3,9 @@ const Address = require('../models/address')
 
 exports.createAddress = async (req, res) => {
     try {
-        const userId = req.user._id
+        const userId = req.user ? req.user._id : req.seller._id;
       const { fullName, addressLine1, addressLine2, city, state, postalCode, country, phone } = req.body;
+      console.log(req.body);
   
       const address = new Address({
         userId,
@@ -125,7 +126,7 @@ exports.updateAddressById = async (req, res) => {
   exports.getAllAddresses = async (req, res) => {
    
     try {
-      const userId = req.user._id;
+      const userId = req.user ? req.user._id : req.seller._id;
   
       const addresses = await Address.find({ userId: userId });
   
@@ -140,5 +141,3 @@ exports.updateAddressById = async (req, res) => {
       });
     }
   };
-  
-

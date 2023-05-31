@@ -121,6 +121,7 @@ exports.updateOrder = async (req, res) => {
 exports.getOrders = async (req, res) => {
   try {
     const userId = req.params.id;
+    console.log(req.params);
     let Myorders;
     if (userId) {
       Myorders = await Order.find({ userId });

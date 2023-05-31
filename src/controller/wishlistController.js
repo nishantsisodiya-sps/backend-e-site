@@ -5,7 +5,8 @@ const Product = require('../models/products')
 
 exports.AddProductToWishlist = async (req, res) => {
   try {
-    const userId = req.user._id;
+   
+    const userId = req.user ? req.user._id : req.seller._id;
     const productId = req.body.productId;
 
     const wishlist = await Wishlist.findOne({ userId: userId });
@@ -87,7 +88,7 @@ exports.GetWishlist = async (req, res) => {
 exports.deleteProductFromWishlist = async (req, res) => {
   try {
     const productId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user ? req.user._id : req.seller._id;
 
     const wishlist = await Wishlist.findOneAndUpdate(
       { userId: userId },
