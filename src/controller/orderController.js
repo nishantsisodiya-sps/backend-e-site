@@ -4,7 +4,9 @@ const Order = require('../models/order');
 const Razorpay = require('razorpay');
 const { v4: uuidv4 } = require('uuid');
 const Product = require('../models/products')
+const Cart = require('../models/cart')
 // const { default: orders } = require('razorpay/dist/types/orders');
+const { transporter, sendEmail , getSellerEmailById} = require('../services/emailSender');
 
 
 exports.createOrder = async (req, res) => {
@@ -72,6 +74,21 @@ exports.createOrder = async (req, res) => {
       }
     ]);
 
+    for (const product of products) {
+      try {
+       
+        const sellerEmail = await getSellerEmailById(product.seller); // Await the function call to resolve the Promise
+  
+        const emailSubject = 'New Order Notification';
+        const emailText = `You have received a new order with ID ${savedOrder._id}`;
+    
+        await sendEmail(sellerEmail, emailSubject, emailText);
+      } catch (error) {
+        console.error('Error getting seller email:', error);
+        // Handle the error appropriately (e.g., log, throw, or continue with the loop)
+      }
+    }
+
     res.json({ orderId: savedOrder._id, razorpayOrderId: order, sellerSoldCounts });
   } catch (error) {
     console.error('Create order error=========>', error);
@@ -103,6 +120,11 @@ exports.updateOrder = async (req, res) => {
     if (payment.status === 'captured') {
       order.status = 'PAID';
       const savedOrder = await order.save();
+      
+
+      // Clear user's cart
+       await Cart.deleteMany({ user: savedOrder.userId });
+    
 
       res.json({ orderId: savedOrder._id, status: savedOrder.status });
     } else {
@@ -131,7 +153,7 @@ exports.getOrders = async (req, res) => {
     }
 
     if (Myorders.length === 0) {
-      return res.status(404).send('Orders not found');
+      return res.status(404).json('Orders not found');
     }
 
     res.status(200).send(Myorders);
