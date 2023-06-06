@@ -5,9 +5,12 @@ const seller = require('../models/seller')
 // Create a transporter with your email service provider's configuration
 const transporter = nodemailer.createTransport({
   service: 'The Nishnat Sisodiya',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // use SSL
   auth: {
     user: 'nishantsisodiya.softprodigy@gmail.com',
-    pass: 'N!$hant#1608',
+    pass: 'infsrohetndziepf',
   },
 });
 
@@ -33,13 +36,13 @@ const sendEmail = async (to, subject, text) => {
 
 
 async function getSellerEmailById(sellerId) {
-    try {
-      const Seller = await seller.findById(sellerId);
-      return Seller.email; // Assuming the seller model has an 'email' field
-    } catch (error) {
-      console.error('Error fetching seller email:', error);
-      throw error;
-    }
+  try {
+    const Seller = await seller.findById(sellerId);
+    return Seller.email; // Assuming the seller model has an 'email' field
+  } catch (error) {
+    console.error('Error fetching seller email:', error);
+    throw error;
   }
+}
 
-module.exports = { transporter, sendEmail , getSellerEmailById};
+module.exports = { transporter, sendEmail, getSellerEmailById };

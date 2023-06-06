@@ -136,7 +136,3 @@ exports.getSoldProducts = async (req, res) => {
     res.status(500).json({ error: 'Unable to fetch sold products' });
   }
 };
-
-
-
-
