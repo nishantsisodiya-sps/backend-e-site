@@ -229,12 +229,21 @@ exports.getSingleOrder = async function (req, res) {
 
 
 
-// exports.deleteAllOrders = async (req , res)=>{
+exports.deleteAllOrders = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    console.log(req.params);
 
-//   try {
-    
-//   } catch (error) {
-    
-//   }
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID not provided' });
+    }
 
-// }
+    // Delete all orders with the specified userId
+    await Order.deleteMany({ userId });
+
+    res.status(200).json({ message: 'All orders deleted successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Unable to delete orders' });
+  }
+};
