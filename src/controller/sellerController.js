@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const Order = require('../models/order');
 const mongoose = require('mongoose')
 
+
 // Register a new seller
 exports.registerSeller = async (req, res) => {
   try {

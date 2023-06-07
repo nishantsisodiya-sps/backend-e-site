@@ -1,11 +1,12 @@
 const SuperAdmin = require('../models/superAdmin');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
 // Register a new super admin
-exports.registerSuperAdmin = async (req, res) => {
+exports.createSuperAdmin = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password } = req.body;
 
     // Check if super admin already exists
     const existingSuperAdmin = await SuperAdmin.findOne({ email });
@@ -13,20 +14,23 @@ exports.registerSuperAdmin = async (req, res) => {
       return res.status(400).json({ message: 'Super admin already exists' });
     }
 
-    // Create a new super admin
+    // Generate an ID for the super admin
+    const superAdminId = uuidv4();
 
+    // Create a new super admin
     const newSuperAdmin = new SuperAdmin({
-      username,
+      _id: superAdminId,
+      name,
       email,
       password,
-      token : []
     });
 
     await newSuperAdmin.save();
 
-    const authToken = await newSuperAdmin.generateAuthToken()
+    const authToken = await newSuperAdmin.generateAuthToken();
 
-    res.status(201).json({ token : authToken , success : true , message : "Sign in as Super Admin" });
+
+    res.status(201).json({ token: authToken, success: true, message: 'Super admin created successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).send();

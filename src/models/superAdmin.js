@@ -1,13 +1,21 @@
 const mongoose = require('mongoose');
 const validator = require('validator')
 const { isAlpha } = require('validator');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken')
 
 const superAdminSchema = new mongoose.Schema({
+
+  _id: {
+    type: String,
+    required: true,
+  },
+
   name: {
     type: String,
     required: true,
     validate: {
-      validator: (value) => validator.isAlpha(value),
+      validator: (value) => /^[A-Za-z\s]+$/.test(value),
       message: 'Name should only contain letters'
     }
   },
@@ -53,7 +61,7 @@ const superAdminSchema = new mongoose.Schema({
 });
 
 
-superAdmin.pre('save' , async function(next){
+superAdminSchema.pre('save' , async function(next){
   try {
     if(this.isModified('password')){
       const hashedPassword = await bcrypt.hash(this.password , 10)
@@ -66,9 +74,9 @@ superAdmin.pre('save' , async function(next){
 });
 
 
-sellerSchema.methods.generateAuthToken = async function (){
+superAdminSchema.methods.generateAuthToken = async function (){
   try {
-    const token = jwt.sign({id : this.id , role : this.role , email : this.email , name: this.name} , process.env.JWT_SECRET , {
+    const token = jwt.sign({id : this._id , role : this.role , email : this.email , name: this.name} , process.env.JWT_SECRET , {
       expiresIn : '1d'
     });
     this.tokens = this.tokens.concat({token})

@@ -80,7 +80,14 @@ exports.createOrder = async (req, res) => {
         const sellerEmail = await getSellerEmailById(product.seller); // Await the function call to resolve the Promise
   
         const emailSubject = 'New Order Notification';
-        const emailText = `You have received a new order with ID ${savedOrder._id}`;
+        const emailText = ` Hello ,
+        You have received a new order with ID ${savedOrder._id}
+        
+        Thanks & Regards 
+        Nishant Sisodiya (Founder , Apna Market)
+        
+        `
+        ;
     
         await sendEmail(sellerEmail, emailSubject, emailText);
       } catch (error) {

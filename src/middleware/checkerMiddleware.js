@@ -1,5 +1,3 @@
-
-
 const jwt = require('jsonwebtoken');
 const Seller = require('../models/seller');
 const User = require('../models/user');
