@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const Seller = require('../models/seller');
 const User = require('../models/user');
+const superAdmin = require('../models/superAdmin');
+
 
 const authenticateSeller = async (req, res, next) => {
   try {
@@ -58,6 +60,14 @@ const checkLoggedIn = async(req, res, next) => {
     if (user) {
       req.token = token;
       req.user = user;
+      return next();
+    }
+
+
+    const superadmin = await superAdmin.findOne({ id: decoded._id, 'tokens.token': token});
+    if(superAdmin){
+      req.token = token;
+      req.superAdmin = superadmin
       return next();
     }
 

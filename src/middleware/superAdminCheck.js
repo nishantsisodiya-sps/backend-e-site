@@ -9,13 +9,13 @@ const superAdminCheck = async (req, res, next) => {
       return res.status(401).json({ message: 'Authorization token not provided' });
     }
 
-    const decoded = jwt.verify(token, 'your_secret_key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Check if the decoded token belongs to a super admin
     const superAdmin = await SuperAdmin.findOne({ _id: decoded?._id, 'tokens.token': token });
 
     if (!superAdmin) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return next();
     }
 
     // Add the super admin document to the request object

@@ -46,12 +46,16 @@ const addressSchema = mongoose.Schema({
         type: String,
         required: true,
         validate: {
-          validator: function (v) {
-            return validator.isMobilePhone(v, ['en-IN']);
-          },
-          message: props => `${props.value} is not a valid phone number!`
+            validator: function (v) {
+                return validator.isMobilePhone(v, ['en-IN']);
+            },
+            message: props => `${props.value} is not a valid phone number!`
         }
-      },
+    },
+    isDefault: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 

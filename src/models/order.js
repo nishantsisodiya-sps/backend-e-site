@@ -18,9 +18,9 @@ const OrderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  status: {
+  PaymentStatus: {
     type: String,
-    enum: ['placed', 'PAID', 'shipped', 'delivered'],
+    enum: ['placed', 'PAID',],
     default: 'placed'
   },
   paymentId: {
@@ -42,7 +42,16 @@ const OrderSchema = new mongoose.Schema({
       quantity: {
         type: Number,
         required: true
-      }
+      },
+      status: {
+        type: String,
+        enum: ['Placed', 'Accepted', 'Packed', 'Shipped', 'Delivered'],
+        default: 'Placed',
+      },
+      shippingDetails: {
+        type: String,
+        required: false,
+      },
     }
   ]
 },

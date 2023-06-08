@@ -11,9 +11,9 @@ router.post('/create-order' ,auth.checkLoggedIn, createOrder);
 // Update an order
 router.post('/update-order', auth.checkLoggedIn , updateOrder);
 
-router.get('/:id' ,superAdminCheck ,auth.checkLoggedIn ,  getOrders);
+router.get('/:id' , auth.checkLoggedIn ,  getOrders);
 
-router.get('/singleOrder/:id' , superAdminCheck ,auth.checkLoggedIn, getSingleOrder)
+router.get('/singleOrder/:id' ,  auth.checkLoggedIn, getSingleOrder)
 
 
 router.delete('/deleteAll/:id' ,auth.checkLoggedIn, deleteAllOrders)

@@ -1,36 +1,75 @@
 const Address = require('../models/address')
 
 
+// exports.createAddress = async (req, res) => {
+//     try {
+//         const userId = req.user ? req.user._id : req.seller._id;
+//       const { fullName, addressLine1, addressLine2, city, state, postalCode, country, phone } = req.body;
+//       console.log(req.body);
+  
+//       const address = new Address({
+//         userId,
+//         fullName,
+//         addressLine1,
+//         addressLine2,
+//         city,
+//         state,
+//         postalCode,
+//         country,
+//         phone,
+//       });
+  
+//       await address.save();
+//       res.status(201).json({
+//         message: "Address created successfully",
+//         address: address,
+//       });
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).json({
+//         error: "Server error",
+//       });
+//     }
+//   };
+
+
+
+
 exports.createAddress = async (req, res) => {
-    try {
-        const userId = req.user ? req.user._id : req.seller._id;
-      const { fullName, addressLine1, addressLine2, city, state, postalCode, country, phone } = req.body;
-      console.log(req.body);
-  
-      const address = new Address({
-        userId,
-        fullName,
-        addressLine1,
-        addressLine2,
-        city,
-        state,
-        postalCode,
-        country,
-        phone,
-      });
-  
-      await address.save();
-      res.status(201).json({
-        message: "Address created successfully",
-        address: address,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        error: "Server error",
-      });
-    }
-  };
+  try {
+    const userId = req.user ? req.user._id : req.seller._id;
+    const { fullName, addressLine1, addressLine2, city, state, postalCode, country, phone } = req.body;
+    console.log(req.body);
+
+    const address = new Address({
+      userId,
+      fullName,
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      postalCode,
+      country,
+      phone,
+      isDefault: true, // Set the newly created address as default
+    });
+
+    // Update any existing default address to not be the default anymore
+    await Address.updateMany({ userId: userId, isDefault: true }, { $set: { isDefault: false } });
+
+    await address.save();
+
+    res.status(201).json({
+      message: "Address created successfully",
+      address: address,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "Server error",
+    });
+  }
+};
 
 
 
@@ -141,3 +180,34 @@ exports.updateAddressById = async (req, res) => {
       });
     }
   };
+
+
+
+
+  exports.setDefaultAddress = async (req, res) => {
+    try {
+      const userId = req.user ? req.user._id : req.seller._id;
+      const addressId = req.params.id;
+  
+      // Update any existing default address to not be the default anymore
+      await Address.updateMany({ userId: userId, isDefault: true }, { $set: { isDefault: false } });
+  
+      // Set the selected address as the new default
+      const updatedAddress = await Address.findByIdAndUpdate(addressId, { isDefault: true }, { new: true });
+  
+      if (!updatedAddress) {
+        return res.status(404).json({ error: "Address not found" });
+      }
+  
+      res.json({
+        message: "Default address updated",
+        address: updatedAddress,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: "Server error",
+      });
+    }
+  };
+  
