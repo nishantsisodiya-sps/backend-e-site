@@ -175,9 +175,12 @@ exports.getOrders = async (req, res) => {
 
 exports.getSingleOrder = async function (req, res) {
   try {
-    const id = req.params.id;
+    
+    const id = req.params. id;
+    console.log(id);
 
     const order = await Order.findById(id).populate('products.product');
+    console.log(order);
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -206,8 +209,9 @@ exports.getSingleOrder = async function (req, res) {
               sellerSoldCount = sellerSoldCounts[0].soldCount;
             }
           }
-
+          console.log(product);
           return {
+          
             id: product._id,
             title: product.title,
             description: product.description,
@@ -231,6 +235,7 @@ exports.getSingleOrder = async function (req, res) {
     res.status(200).json(orderWithProductDetails);
   } catch (error) {
     res.status(500).json({ message: error.message });
+    console.log(error);
   }
 };
 
