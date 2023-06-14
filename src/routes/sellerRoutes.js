@@ -12,11 +12,16 @@ router.post('/login', sellerController.loginSeller);
 
 // Get seller profile
 router.get('/profile/:id',
-superAdminCheck,
  authMiddleware.authenticateSeller, 
 sellerController.getProfile);
 
 
-router.get('/sold-products/:sellerId', superAdminCheck , sellerController.getSoldProducts);
+router.get('/sold-products/:sellerId' , sellerController.getSoldProducts);
+
+
+router.get('/sold-productsNew/:sellerId' , sellerController.getSoldProductsSeller);
+
+
+router.get('/AllSellers' , sellerController.getSellers);
 
 module.exports = router;

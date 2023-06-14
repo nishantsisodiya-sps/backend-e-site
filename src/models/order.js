@@ -20,8 +20,8 @@ const OrderSchema = new mongoose.Schema({
   },
   PaymentStatus: {
     type: String,
-    enum: ['placed', 'PAID',],
-    default: 'placed'
+    enum: ['COD', 'PAID',],
+    default: 'COD'
   },
   paymentId: {
     type: String,

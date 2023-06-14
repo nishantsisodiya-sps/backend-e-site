@@ -2,6 +2,8 @@ const SuperAdmin = require('../models/superAdmin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const User = require('../models/user')
+const Seller = require('../models/seller')
 
 // Register a new super admin
 exports.createSuperAdmin = async (req, res) => {
@@ -63,3 +65,37 @@ exports.loginSuperAdmin = async (req, res) => {
     res.status(500).send();
   }
 };
+
+
+
+exports.blockUser = async (req, res) => {
+  try {
+    const { userType, userId } = req.params;
+
+    let user;
+
+    // Find the user by ID based on the user type
+    if (userType === 'user') {
+      user = await User.findById(userId);
+    } else if (userType === 'seller') {
+      // Replace 'Seller' with your seller model name if different
+      user = await Seller.findById(userId);
+    }
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Update the user's block status
+    user.isBlocked = true;
+    await user.save();
+
+    res.json({ msg: 'User blocked successfully' });
+  } catch (error) {
+    console.log('Block user error', error);
+    res.status(500).json({ msg: 'Internal server error' });
+  }
+};
+
+
+

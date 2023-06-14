@@ -16,11 +16,11 @@ router.get('/' , productController.getProducts);
 router.get('/search', productController.searchProduct)
 
 // Get single product by ID
-router.get('/:id',superAdminCheck , checkToken.checkToken , productController.getSingleProduct);
+router.get('/:id' , checkToken.checkToken , productController.getSingleProduct);
 
 // Add a new product
 router.post('/add',
-superAdminCheck,
+
   authMiddleware.authenticateSeller,
   verifySeller,
   uploadMiddleware.upload,
@@ -30,20 +30,20 @@ superAdminCheck,
 
 // Get all products of a seller
 router.get('/seller/:sellerId',
-superAdminCheck,
+
   authMiddleware.authenticateSeller,
   productController.getSellerProducts);
 
 
 router.patch('/:id',
-superAdminCheck ,
+
   authMiddleware.authenticateSeller,
   uploadMiddleware.upload,
   productController.updateProduct)
 
 
 router.delete('/:id',
-superAdminCheck,
+
   authMiddleware.authenticateSeller,
   productController.deleteProduct)
 

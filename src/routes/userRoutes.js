@@ -12,8 +12,11 @@ router.post('/login', userController.loginUser);
 
 // Get user profile
 router.get('/profile/:id', 
-superAdminCheck,
+
 authMiddleware.authenticateUser,
  userController.getProfile);
+
+
+ router.get('/Allusers' , userController.getUsers)
 
 module.exports = router;

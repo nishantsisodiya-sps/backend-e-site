@@ -53,6 +53,12 @@ const sellerSchema = new mongoose.Schema({
     default: Date.now
   },
 
+  isBlocked : {
+    type : Boolean,
+    enum: [true , false],
+    default:false
+  },
+
 
   tokens: [{
     token: { type: String, required: true }

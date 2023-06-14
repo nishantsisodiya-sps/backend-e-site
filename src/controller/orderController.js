@@ -25,7 +25,7 @@ exports.createOrder = async (req, res) => {
       amount: amount,
       currency,
       receipt: uuidv4(),
-      payment_capture,
+      payment_capture, 
       notes: {
         'mode': 'test'
       }

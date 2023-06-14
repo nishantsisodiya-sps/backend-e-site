@@ -13,13 +13,17 @@ const userSchema = new mongoose.Schema({
       message: 'Name should only contain alphabetic characters'
     }
   },
+
   email: {
     type: String, required: true, unique: true, lowercase: true, validate: {
       validator: validator.isEmail,
       message: 'Invalid email address'
     }
   },
+
   password: { type: String, required: true },
+
+  
   phone: {
     type: String,
     required: true,
@@ -30,11 +34,20 @@ const userSchema = new mongoose.Schema({
       message: props => `${props.value} is not a valid phone number!`
     }
   },
+
   role: { type: String, enum: ['user', 'seller', 'superAdmin'], default: 'user' },
+
   createdAt: {
     type: Date,
     default: Date.now
   },
+
+  isBlocked : {
+    type : Boolean,
+    enum: [true , false],
+    default:false
+  },
+
   tokens: [{
     token: { type: String, required: true }
   }]

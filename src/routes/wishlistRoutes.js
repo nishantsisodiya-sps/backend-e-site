@@ -6,11 +6,11 @@ const superAdminCheck = require('../middleware/superAdminCheck')
 
 
 
-router.post('/add', superAdminCheck,checkLoggedIn.checkToken , wishlistController.AddProductToWishlist)
+router.post('/add',checkLoggedIn.checkToken , wishlistController.AddProductToWishlist)
  
-router.get('/:id' , superAdminCheck,checkLoggedIn.checkToken  , wishlistController.GetWishlist)
+router.get('/:id' , checkLoggedIn.checkToken  , wishlistController.GetWishlist)
 
-router.delete('/:id' ,superAdminCheck,checkLoggedIn.checkToken  , wishlistController.deleteProductFromWishlist)
+router.delete('/:id' ,checkLoggedIn.checkToken  , wishlistController.deleteProductFromWishlist)
 
 
 

@@ -81,3 +81,23 @@ exports.getProfile = async (req, res, next) => {
     res.status(500).send('Server error');
   }
 };
+
+
+
+exports.getUsers = async (req , res)=>{
+  
+  try {
+    
+    const users = await User.find().select('-tokens -password');
+
+    if(!users){
+      return res.status(404).json({msg : 'Users Not Found'})
+    }
+
+    res.json(users)
+
+  } catch (error) {
+    console.log('Get users error' , error);
+  }
+
+}
