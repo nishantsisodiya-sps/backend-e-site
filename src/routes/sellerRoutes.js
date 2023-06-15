@@ -19,7 +19,7 @@ sellerController.getProfile);
 router.get('/sold-products/:sellerId' , sellerController.getSoldProducts);
 
 
-router.get('/sold-productsNew/:sellerId' , sellerController.getSoldProductsSeller);
+// router.get('/sold-productsNew/:sellerId' , sellerController.getSoldProductsSeller);
 
 
 router.get('/AllSellers' , sellerController.getSellers);

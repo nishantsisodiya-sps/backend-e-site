@@ -87,131 +87,6 @@ exports.getProfile = async (req, res) => {
 
 
 
-
-// exports.getSoldProducts = async (req, res) => {
-//   try {
-//     const sellerId = req.params.sellerId;
-
-//     // Retrieve sold products information for the seller
-//     const soldProducts = await Order.aggregate([
-//       {
-//         $match: {
-//           'products.seller._id': new mongoose.Types.ObjectId(sellerId),
-//           PaymentStatus: { $in: ['PAID', 'shipped', 'delivered'] }
-//         }
-//       },
-//       {
-//         $unwind: '$products'
-//       },
-//       {
-//         $match: {
-//           'products.seller._id': new mongoose.Types.ObjectId(sellerId)
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: '$products.product._id',
-//           quantitySold: { $sum: '$products.quantity' }
-//         }
-//       },
-//       {
-//         $lookup: {
-//           from: 'products',
-//           localField: '_id',
-//           foreignField: '_id',
-//           as: 'product'
-//         }
-//       },
-//       {
-//         $unwind: '$product'
-//       },
-//       {
-//         $match: {
-//           'product.seller._id': new mongoose.Types.ObjectId(sellerId)
-//         }
-//       }
-//     ]);
-
-//     res.json(soldProducts);
-//   } catch (error) {
-//     console.error('Get sold products error:', error);
-//     res.status(500).json({ error: 'Unable to fetch sold products' });
-//   }
-// };
-
-
-
-
-
-exports.getSoldProductsSeller = async (req, res) => {
-  try {
-    const sellerId = req.params.sellerId;
-
-    // Retrieve sold products information for the seller
-    const soldProducts = await Order.aggregate([
-      {
-        $match: {
-          'products.seller': new mongoose.Types.ObjectId(sellerId),
-          status: { $in: ['PAID', 'shipped', 'delivered'] }
-        }
-      },
-      {
-        $unwind: '$products'
-      },
-      {
-        $match: {
-          'products.seller': new mongoose.Types.ObjectId(sellerId)
-        }
-      },
-      {
-        $lookup: {
-          from: 'products',
-          localField: 'products.product',
-          foreignField: '_id',
-          as: 'product'
-        }
-      },
-      {
-        $unwind: '$product'
-      },
-      {
-        $project: {
-          _id: 0,
-          product: {
-            _id: '$product._id',
-            name: '$product.name',
-            title: '$product.title',
-            description: '$product.description',
-            price: '$product.price',
-            seller: '$product.seller',
-            quantity: '$products.quantity',
-            status: '$products.status',
-            shippingDetails: '$products.shippingDetails',
-            address: '$address',
-            paymentId: '$paymentId',
-            paymentStatus: '$PaymentStatus',
-            productName: '$product.name',
-            productStatus: {
-              $cond: {
-                if: { $eq: ['$products.status', 'Placed'] },
-                then: 'Pending',
-                else: '$products.status'
-              }
-            }
-          }
-        }
-      }
-    ]);
-
-    res.json(soldProducts);
-  } catch (error) {
-    console.error('Get sold products error:', error);
-    res.status(500).json({ error: 'Unable to fetch sold products' });
-  }
-};
-
-
-
 exports.getSoldProducts = async (req, res) => {
   try {
     const sellerId = req.params.sellerId;
@@ -256,13 +131,139 @@ exports.getSoldProducts = async (req, res) => {
       }
     ]);
 
-
-    res.json(soldProducts);
+    res.json({ soldProducts });
   } catch (error) {
     console.error('Get sold products error:', error);
     res.status(500).json({ error: 'Unable to fetch sold products' });
   }
 };
+
+
+
+
+
+
+// exports.getSoldProductsSeller = async (req, res) => {
+//   try {
+//     const sellerId = req.params.sellerId;
+
+//     // Retrieve sold products information for the seller
+//     const soldProducts = await Order.aggregate([
+//       {
+//         $match: {
+//           'products.seller': new mongoose.Types.ObjectId(sellerId),
+//           status: { $in: ['PAID', 'shipped', 'delivered'] }
+//         }
+//       },
+//       {
+//         $unwind: '$products'
+//       },
+//       {
+//         $match: {
+//           'products.seller': new mongoose.Types.ObjectId(sellerId)
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: 'products',
+//           localField: 'products.product',
+//           foreignField: '_id',
+//           as: 'product'
+//         }
+//       },
+//       {
+//         $unwind: '$product'
+//       },
+//       {
+//         $project: {
+//           _id: 0,
+//           product: {
+//             _id: '$product._id',
+//             name: '$product.name',
+//             title: '$product.title',
+//             description: '$product.description',
+//             price: '$product.price',
+//             seller: '$product.seller',
+//             quantity: '$products.quantity',
+//             status: '$products.status',
+//             shippingDetails: '$products.shippingDetails',
+//             address: '$address',
+//             paymentId: '$paymentId',
+//             paymentStatus: '$PaymentStatus',
+//             productName: '$product.name',
+//             productStatus: {
+//               $cond: {
+//                 if: { $eq: ['$products.status', 'Placed'] },
+//                 then: 'Pending',
+//                 else: '$products.status'
+//               }
+//             }
+//           }
+//         }
+//       }
+//     ]);
+
+//     res.json(soldProducts);
+//   } catch (error) {
+//     console.error('Get sold products error:', error);
+//     res.status(500).json({ error: 'Unable to fetch sold products' });
+//   }
+// };
+
+
+
+// exports.getSoldProducts = async (req, res) => {
+//   try {
+//     const sellerId = req.params.sellerId;
+
+//     // Retrieve sold products information for the seller
+//     const soldProducts = await Order.aggregate([
+//       {
+//         $match: {
+//           'products.seller': new mongoose.Types.ObjectId(sellerId),
+//           status: { $in: ['PAID', 'shipped', 'delivered'] }
+//         }
+//       },
+//       {
+//         $unwind: '$products'
+//       },
+//       {
+//         $match: {
+//           'products.seller': new mongoose.Types.ObjectId(sellerId)
+//         }
+//       },
+//       {
+//         $group: {
+//           _id: '$products.product',
+//           quantitySold: { $sum: '$products.quantity' }
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: 'products',
+//           localField: '_id',
+//           foreignField: '_id',
+//           as: 'product'
+//         }
+//       },
+//       {
+//         $unwind: '$product'
+//       },
+//       {
+//         $match: {
+//           'product.seller': new mongoose.Types.ObjectId(sellerId)
+//         }
+//       }
+//     ]);
+
+//     res.json({ soldProducts });
+//   } catch (error) {
+//     console.error('Get sold products error:', error);
+//     res.status(500).json({ error: 'Unable to fetch sold products' });
+//   }
+// };
+
+
 
 
 

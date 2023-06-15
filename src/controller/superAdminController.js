@@ -56,9 +56,9 @@ exports.loginSuperAdmin = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-   // Generate auth token
-   const authToken = await existingSuperAdmin.generateAuthToken()
-   res.status(200).json({ token : authToken , success : true , message : "Sign in as Super Admin" });
+    // Generate auth token
+    const authToken = await existingSuperAdmin.generateAuthToken()
+    res.status(200).json({ token: authToken, success: true, message: "Sign in as Super Admin" });
 
   } catch (err) {
     console.error(err);
@@ -70,32 +70,51 @@ exports.loginSuperAdmin = async (req, res) => {
 
 exports.blockUser = async (req, res) => {
   try {
-    const { userType, userId } = req.params;
+    const userId = req.params.id;
 
-    let user;
-
-    // Find the user by ID based on the user type
-    if (userType === 'user') {
-      user = await User.findById(userId);
-    } else if (userType === 'seller') {
-      // Replace 'Seller' with your seller model name if different
-      user = await Seller.findById(userId);
-    }
+    const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Update the user's block status
-    user.isBlocked = true;
+    // Toggle the block status
+    user.isBlocked = !user.isBlocked;
     await user.save();
 
-    res.json({ msg: 'User blocked successfully' });
+    const message = user.isBlocked ? 'User blocked successfully' : 'User unblocked successfully';
+    res.json({ msg: message });
   } catch (error) {
-    console.log('Block user error', error);
+    console.log('Toggle block user error', error);
     res.status(500).json({ msg: 'Internal server error' });
   }
 };
 
+
+
+exports.blockSeller = async(req , res)=>{
+  try {
+    const sellerId = req.params.id;
+
+
+    const seller = await Seller.findById(sellerId);
+
+    if(!seller){
+      res.status(404).json({message : "seller not found"})
+    }
+
+    // Toggle the block status
+    seller.isBlocked = !seller.isBlocked;
+    await seller.save()
+
+    const message = seller.isBlocked ? 'Seller blocked successfully' : 'Seller unblocked successfully';
+    res.json({msg : message})
+
+
+  } catch (error) {
+    console.log('Block selller error', error);
+    res.status(500).json({ msg: 'Internal server error' });
+  }
+}
 
 
