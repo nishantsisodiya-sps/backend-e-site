@@ -3,7 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const User = require('../models/user')
-const Seller = require('../models/seller')
+const Seller = require('../models/seller');
+const Order = require('../models/order');
 
 // Register a new super admin
 exports.createSuperAdmin = async (req, res) => {
@@ -118,3 +119,21 @@ exports.blockSeller = async(req , res)=>{
 }
 
 
+
+exports.getAllOrder = async(req , res)=>{
+
+  try {
+    
+    let orders = await Order.find()
+
+    if(!orders){
+      res.status(404).json({msg : 'Order not found'})
+    }
+
+    res.status(201).json({status : '201' , orders : orders})
+
+  } catch (error) {
+    console.log(error);
+  }
+
+}

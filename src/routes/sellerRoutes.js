@@ -19,9 +19,19 @@ sellerController.getProfile);
 router.get('/sold-products/:sellerId' , sellerController.getSoldProducts);
 
 
-// router.get('/sold-productsNew/:sellerId' , sellerController.getSoldProductsSeller);
+router.get('/sold-productsNew/:sellerId' , sellerController.getSoldProductsSeller);
 
 
 router.get('/AllSellers' , sellerController.getSellers);
+
+
+
+router.post('/updateStatus' , sellerController.updateStatus);
+
+
+
+router.get('/getProductStockAndSoldCount/:id' , sellerController.getProductStockAndSoldCount);
+
+
 
 module.exports = router;

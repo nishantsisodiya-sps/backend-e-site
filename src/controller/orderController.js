@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const Product = require('../models/products')
 const Cart = require('../models/cart')
 // const { default: orders } = require('razorpay/dist/types/orders');
-const { transporter, sendEmail , getSellerEmailById} = require('../services/emailSender');
+const { transporter, sendEmail, getSellerEmailById } = require('../services/emailSender');
 
 
 exports.createOrder = async (req, res) => {
@@ -25,7 +25,7 @@ exports.createOrder = async (req, res) => {
       amount: amount,
       currency,
       receipt: uuidv4(),
-      payment_capture, 
+      payment_capture,
       notes: {
         'mode': 'test'
       }
@@ -45,11 +45,29 @@ exports.createOrder = async (req, res) => {
         seller: product.seller,
         quantity: product.quantity,
       })),
-      status: 'placed',
+      status: 'COD',
       paymentId: order.id
     });
 
     const savedOrder = await newOrder.save();
+
+
+    // Decrement the stock of each product
+    for (const product of products) {
+      const productDoc = await Product.findById(product.id);
+      if (!productDoc) {
+        res.status(404).json({msg : 'Product not found'})
+        console.log('productDoc error');
+        continue;
+      }
+
+      const remainingStock = productDoc.stock - product.quantity;
+      productDoc.stock = remainingStock >= 0 ? remainingStock : 0;
+      await productDoc.save();
+    }
+
+
+
 
     // Increment sold count for each product and seller
     for (const product of products) {
@@ -76,9 +94,9 @@ exports.createOrder = async (req, res) => {
 
     for (const product of products) {
       try {
-       
+
         const sellerEmail = await getSellerEmailById(product.seller); // Await the function call to resolve the Promise
-  
+
         const emailSubject = 'New Order Notification';
         const emailText = ` Hello ,
         You have received a new order with ID ${savedOrder._id}
@@ -87,8 +105,8 @@ exports.createOrder = async (req, res) => {
         Nishant Sisodiya (Founder , Apna Market)
         
         `
-        ;
-    
+          ;
+
         await sendEmail(sellerEmail, emailSubject, emailText);
       } catch (error) {
         console.error('Error getting seller email:', error);
@@ -116,29 +134,29 @@ exports.updateOrder = async (req, res) => {
       key_secret: 'oCleWUV3s6qvUbqTsWSB0C89'
     });
     const payment = await razorpay.payments.fetch(paymentId);
- 
+
     const id = payment.order_id
-  
+
     // Update the order status
-    const order = await Order.findOne({paymentId: id });
+    const order = await Order.findOne({ paymentId: id });
 
     if (!order) return res.status(404).json({ error: 'Order not found' });
 
     if (payment.status === 'captured') {
-      order.status = 'PAID';
+      order.PaymentStatus = 'PAID';
       const savedOrder = await order.save();
-      
+
 
       // Clear user's cart
-       await Cart.deleteMany({ user: savedOrder.userId });
-    
+      await Cart.deleteMany({ user: savedOrder.userId });
+
 
       res.json({ orderId: savedOrder._id, status: savedOrder.status });
     } else {
       res.json({ status: payment.status });
     }
-  } catch (error) {       
-    console.error('Update order error=======>' , error);
+  } catch (error) {
+    console.error('Update order error=======>', error);
     res.status(500).json({ error: 'Unable to update order' });
   }
 };
@@ -154,7 +172,7 @@ exports.getOrders = async (req, res) => {
     let Myorders;
     if (userId) {
       Myorders = await Order.find({ userId });
-      
+
     } else {
       return res.status(400).send('Please provide either userId or sellerId');
     }
@@ -175,8 +193,8 @@ exports.getOrders = async (req, res) => {
 
 exports.getSingleOrder = async function (req, res) {
   try {
-    
-    const id = req.params. id;
+
+    const id = req.params.id;
     console.log(id);
 
     const order = await Order.findById(id).populate('products.product');
@@ -211,7 +229,7 @@ exports.getSingleOrder = async function (req, res) {
           }
           console.log(product);
           return {
-          
+
             id: product._id,
             title: product.title,
             description: product.description,

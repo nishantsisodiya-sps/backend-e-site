@@ -15,7 +15,7 @@ const superAdminCheck = async (req, res, next) => {
 
     // Check if the decoded token belongs to a super admin
     const superAdmin = await SuperAdmin.findOne({ _id: decoded?._id, 'tokens.token': token });
-    console.log('admin' , superAdmin);
+    
 
     if (!superAdmin) {
       return next();

@@ -13,4 +13,7 @@ router.post('/blockUser/:id' , superAdminCheck , superAdminController.blockUser)
 router.post('/blockSeller/:id', superAdminCheck , superAdminController.blockSeller)
 
 
+router.get('/getAllOrder' , superAdminCheck , superAdminController.getAllOrder)
+
+
 module.exports = router
