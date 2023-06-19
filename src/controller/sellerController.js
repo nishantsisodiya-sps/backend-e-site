@@ -317,7 +317,7 @@ exports.getProductStockAndSoldCount = async (req, res) => {
       const soldProduct = soldCount.find((item) => item._id.equals(product._id));
       return {
         _id: product._id,
-        name: product.name,
+        // name: product.name,
         stock: product.stock,
         thumbnail: product.thumbnail,
         title: product.title,

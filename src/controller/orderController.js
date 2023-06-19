@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const Product = require('../models/products')
 const Cart = require('../models/cart')
 // const { default: orders } = require('razorpay/dist/types/orders');
-const { transporter, sendEmail, getSellerEmailById } = require('../services/emailSender');
+const { transporter, sendEmail, getSellerEmailById, getUserEmailById } = require('../services/emailSender');
 
 
 exports.createOrder = async (req, res) => {
@@ -56,7 +56,7 @@ exports.createOrder = async (req, res) => {
     for (const product of products) {
       const productDoc = await Product.findById(product.id);
       if (!productDoc) {
-        res.status(404).json({msg : 'Product not found'})
+        res.status(404).json({ msg: 'Product not found' })
         console.log('productDoc error');
         continue;
       }
@@ -98,16 +98,46 @@ exports.createOrder = async (req, res) => {
         const sellerEmail = await getSellerEmailById(product.seller); // Await the function call to resolve the Promise
 
         const emailSubject = 'New Order Notification';
-        const emailText = ` Hello ,
-        You have received a new order with ID ${savedOrder._id}
-        
-        Thanks & Regards 
-        Nishant Sisodiya (Founder , Apna Market)
-        
-        `
+        const emailText =`Hello,
+
+        You have received a new order with ID ${savedOrder._id}.
+    
+        Product Details:
+        - Name: ${product.name}
+        - Quantity: ${product.quantity}
+    
+        Thank you for your business!
+    
+        Regards,
+        Nishant Sisodiya (Founder , Apna Market)`;
           ;
 
+
+        // Get user email by user Id
+
+        const userEmail = await getUserEmailById(userId);
+
+        // Send email to the user with the list of purchased products
+        const emailSubjectUser = 'Order Confirmation';
+        const emailTextUser = `Hello,
+
+    Thank you for your order! Here are the details of your purchase:
+
+    Order ID: ${savedOrder._id}
+
+    Products:
+    ${products.map(product => `- ${product.title} (Quantity: ${product.quantity})`).join('\n')}
+
+    Total Amount: ${amount} INR
+
+    If you have any questions or need further assistance, please feel free to contact us.
+
+    Regards,
+    Nishant Sisodiya (Founder , Apna Market)`;
+
+
         await sendEmail(sellerEmail, emailSubject, emailText);
+        await sendEmail(userEmail, emailSubjectUser, emailTextUser);
       } catch (error) {
         console.error('Error getting seller email:', error);
         // Handle the error appropriately (e.g., log, throw, or continue with the loop)
@@ -165,43 +195,179 @@ exports.updateOrder = async (req, res) => {
 //get orders api
 
 
+
 exports.getOrders = async (req, res) => {
   try {
     const userId = req.params.id;
-    console.log(req.params);
-    let Myorders;
-    if (userId) {
-      Myorders = await Order.find({ userId });
 
+    let myOrders;
+    if (userId) {
+      myOrders = await Order.find({ userId }).populate('products.product');
     } else {
       return res.status(400).send('Please provide either userId or sellerId');
     }
 
-    if (Myorders.length === 0) {
+    if (myOrders.length === 0) {
       return res.status(404).json('Orders not found');
     }
 
-    res.status(200).send(Myorders);
+    const ordersWithProductDetails = [];
+    for (const order of myOrders) {
+      for (const myproduct of order.products) {
+  
+        const productDetails = await Product.findById(myproduct.product._id);
+        const orderWithProductDetails = {
+          _id: order._id,
+          userId: order.userId,
+          name: order.name,
+          address: order.address,
+          amount: order.amount,
+          PaymentStatus: order.PaymentStatus,
+          paymentId: order.paymentId,
+          product: {
+            product: productDetails,
+            seller: myproduct.seller,
+            quantity: myproduct.quantity,
+            status: myproduct.status,
+            shippingDetails: myproduct.shippingDetails,
+          },
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+        };
+        ordersWithProductDetails.push(orderWithProductDetails);
+      }
+    }
+
+    res.status(200).json(ordersWithProductDetails);
   } catch (error) {
-    console.log('getOrders error=====>', error);
-    res.status(500).send('Internal Server Error');
+    console.log('getOrders error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
 
 
 
+
+// exports.getSingleOrder = async function (req, res) {
+//   try {
+
+//     const id = req.params.id;
+//     console.log(id);
+
+//     const order = await Order.findById(id).populate('products.product');
+//     console.log(order);
+//     if (!order) {
+//       return res.status(404).json({ message: 'Order not found' });
+//     }
+
+//     const orderWithProductDetails = {
+//       id: order._id,
+//       name: order.name,
+//       userId: order.userId,
+//       address: order.address,
+//       amount: order.amount,
+//       status: order.status,
+//       paymentId: order.paymentId,
+//       products: await Promise.all(
+//         order.products.map(async (productItem) => {
+//           const product = productItem.product;
+//           const seller = productItem.seller;
+//           const quantity = productItem.quantity;
+
+//           let sellerSoldCount = 0;
+//           if (product && seller) {
+//             const sellerSoldCounts = await Product.aggregate([
+//               { $match: { _id: product, seller } },
+//               { $group: { _id: '$seller', soldCount: { $sum: '$soldCount' } } }
+//             ]);
+//             if (sellerSoldCounts.length > 0) {
+//               sellerSoldCount = sellerSoldCounts[0].soldCount;
+//             }
+//           }
+//           console.log(product);
+//           return {
+
+//             id: product._id,
+//             title: product.title,
+//             description: product.description,
+//             price: product.price,
+//             thumbnail: product.thumbnail,
+//             rating: product.rating,
+//             discountPercentage: product.discountPercentage,
+//             stock: product.stock,
+//             images: product.images,
+//             brand: product.brand,
+//             category: product.category,
+//             quantity,
+//             sellerSoldCount
+//           };
+//         })
+//       ),
+//       createdAt: order.createdAt,
+//       updatedAt: order.updatedAt
+//     };
+
+//     res.status(200).json(orderWithProductDetails);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//     console.log(error);
+//   }
+// };
+
+
+
 exports.getSingleOrder = async function (req, res) {
   try {
+    console.log(req.params);
+    const [orderId, productId] = req.params.id.split('-');
+    // console.log(orderId);
+    // console.log(productId);
 
-    const id = req.params.id;
-    console.log(id);
-
-    const order = await Order.findById(id).populate('products.product');
-    console.log(order);
+    const order = await Order.findById(orderId).populate('products.product');
+ 
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
+
+    const productItem = order.products.find(
+      (item) => item.product._id.toString() === productId
+    );
+
+    if (!productItem) {
+      return res.status(404).json({ message: 'Product not found in order' });
+    }
+
+    const product = productItem.product;
+    const seller = productItem.seller;
+    const quantity = productItem.quantity;
+
+    let sellerSoldCount = 0;
+    if (product && seller) {
+      const sellerSoldCounts = await Product.aggregate([
+        { $match: { _id: product, seller } },
+        { $group: { _id: '$seller', soldCount: { $sum: '$soldCount' } } }
+      ]);
+      if (sellerSoldCounts.length > 0) {
+        sellerSoldCount = sellerSoldCounts[0].soldCount;
+      }
+    }
+
+    const productDetails = {
+      id: product._id,
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      thumbnail: product.thumbnail,
+      rating: product.rating,
+      discountPercentage: product.discountPercentage,
+      stock: product.stock,
+      images: product.images,
+      brand: product.brand,
+      category: product.category,
+      quantity,
+      sellerSoldCount
+    };
 
     const orderWithProductDetails = {
       id: order._id,
@@ -211,41 +377,7 @@ exports.getSingleOrder = async function (req, res) {
       amount: order.amount,
       status: order.status,
       paymentId: order.paymentId,
-      products: await Promise.all(
-        order.products.map(async (productItem) => {
-          const product = productItem.product;
-          const seller = productItem.seller;
-          const quantity = productItem.quantity;
-
-          let sellerSoldCount = 0;
-          if (product && seller) {
-            const sellerSoldCounts = await Product.aggregate([
-              { $match: { _id: product, seller } },
-              { $group: { _id: '$seller', soldCount: { $sum: '$soldCount' } } }
-            ]);
-            if (sellerSoldCounts.length > 0) {
-              sellerSoldCount = sellerSoldCounts[0].soldCount;
-            }
-          }
-          console.log(product);
-          return {
-
-            id: product._id,
-            title: product.title,
-            description: product.description,
-            price: product.price,
-            thumbnail: product.thumbnail,
-            rating: product.rating,
-            discountPercentage: product.discountPercentage,
-            stock: product.stock,
-            images: product.images,
-            brand: product.brand,
-            category: product.category,
-            quantity,
-            sellerSoldCount
-          };
-        })
-      ),
+      products: [productDetails],
       createdAt: order.createdAt,
       updatedAt: order.updatedAt
     };
@@ -256,6 +388,7 @@ exports.getSingleOrder = async function (req, res) {
     console.log(error);
   }
 };
+
 
 
 
@@ -277,3 +410,18 @@ exports.deleteAllOrders = async (req, res) => {
     res.status(500).json({ error: 'Unable to delete orders' });
   }
 };
+
+
+
+
+exports.cancleOrders = async(req , res)=>{
+
+  try {
+    
+    const userId = req.params.id
+
+  } catch (error) {
+    
+  }
+
+}

@@ -13,7 +13,7 @@ router.post('/update-order', auth.checkLoggedIn , updateOrder);
 
 router.get('/:id' , auth.checkLoggedIn ,  getOrders);
 
-router.get('/singleOrder/:id' ,  auth.checkLoggedIn, getSingleOrder)
+router.get('/singleOrder/:id/:id' ,  auth.checkLoggedIn, getSingleOrder)
 
 
 router.delete('/deleteAll/:id' ,auth.checkLoggedIn, deleteAllOrders)

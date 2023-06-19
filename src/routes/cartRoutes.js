@@ -7,11 +7,11 @@ const superAdminCheck = require('../middleware/superAdminCheck')
 router.get('/:userId',
     cartController.getCart);
 
-router.delete('/:cartItemId', superAdminCheck , authMiddleware.checkLoggedIn,
+router.delete('/:cartItemId' , authMiddleware.checkLoggedIn,
     cartController.removeFromCart);
 
 
-router.put('/:cartItemId', superAdminCheck,  authMiddleware.checkLoggedIn, cartController.updateCartItem);
+router.put('/:cartItemId',  authMiddleware.checkLoggedIn, cartController.updateCartItem);
 
 router.post('/add' , authMiddleware.checkLoggedIn,
     cartController.addToCart);

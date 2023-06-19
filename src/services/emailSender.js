@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const seller = require('../models/seller')
+const user = require('../models/user')
 
 
 // Create a transporter with your email service provider's configuration
@@ -45,4 +46,15 @@ async function getSellerEmailById(sellerId) {
   }
 }
 
-module.exports = { transporter, sendEmail, getSellerEmailById };
+
+async function getUserEmailById(userId) {
+  try {
+    const User = await user.findById(userId);
+    return User.email;
+  } catch (error) {
+    console.error('Error fetching seller email:', error);
+    throw error;
+  }
+}
+
+module.exports = { transporter, sendEmail, getSellerEmailById , getUserEmailById };
