@@ -126,6 +126,7 @@ exports.getSoldProductsSeller = async (req, res) => {
             title: '$product.title',
             description: '$product.description',
             price: '$product.price',
+            thumbnail : '$product.thumbnail',
             seller: '$product.seller',
             quantity: '$products.quantity',
             status: '$products.status',
