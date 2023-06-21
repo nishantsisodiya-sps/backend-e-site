@@ -45,10 +45,14 @@ const OrderSchema = new mongoose.Schema({
       },
       status: {
         type: String,
-        enum: ['Placed', 'Packed', 'Shipped', 'Delivered'],
+        enum: ['Placed', 'Packed', 'Shipped', 'Delivered' , 'Cancelled'],
         default: 'Placed',
       },
-      shippingDetails: {
+      shippingCompany: {
+        type: String,
+        required: false,
+      },
+      shippingCompanyAddress: {
         type: String,
         required: false,
       },

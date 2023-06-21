@@ -13,6 +13,10 @@ const authenticateSeller = async (req, res, next) => {
       throw new Error();
     }
 
+    if (seller.isBlocked) {
+      throw new Error('Seller is blocked');
+    }
+
     req.token = token;
     req.seller = seller;
     next();
@@ -29,6 +33,10 @@ const authenticateUser = async (req, res, next) => {
 
     if (!user) {
       throw new Error();
+    }
+
+    if (user.isBlocked) {
+      throw new Error('User is blocked');
     }
 
     req.token = token;

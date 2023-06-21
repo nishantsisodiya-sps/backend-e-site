@@ -351,15 +351,34 @@ exports.deleteAllOrders = async (req, res) => {
 
 
 
+// Cancel an order
+exports.cancelOrder = async (req, res) => {
+  try {
+    const { orderId, productId } = req.body;
 
-// exports.cancleOrders = async(req , res)=>{
+    // Find the order by orderId
+    const order = await Order.findById(orderId);
 
-//   try {
-    
-//     const userId = req.params.id
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
 
-//   } catch (error) {
-    
-//   }
+    // Find the product in the order's products array with the given product ID
+    const product = order.products.find((product) => product.product.toString() === productId);
 
-// }
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found in the order' });
+    }
+
+    // Update the product's status to "Cancelled"
+    product.status = 'Cancelled';
+
+    // Save the updated order
+    const updatedOrder = await order.save();
+
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error('Cancel order error:', error);
+    res.status(500).json({ error: 'Unable to cancel order' });
+  }
+};

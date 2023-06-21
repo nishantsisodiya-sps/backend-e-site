@@ -86,6 +86,7 @@ exports.getProfile = async (req, res) => {
 
 
 
+
 exports.getSoldProductsSeller = async (req, res) => {
   try {
     const sellerId = req.params.sellerId;
@@ -136,6 +137,7 @@ exports.getSoldProductsSeller = async (req, res) => {
             paymentStatus: '$PaymentStatus',
             productName: '$product.name',
             userName : '$name',
+            oderId : '$_id',
             productStatus: {
               $cond: {
                 if: { $eq: ['$products.product.status', 'Placed'] },
@@ -233,7 +235,7 @@ exports.getSellers = async (req , res)=>{
 
 exports.updateStatus = async (req, res) => {
   try {
-    const { orderId, productId, status } = req.body;
+    const { orderId, productId, status, shippingCompany, shippingCompanyAddress } = req.body;
 
     // Find the order with the given order ID
     const order = await Order.findById(orderId);
@@ -249,8 +251,10 @@ exports.updateStatus = async (req, res) => {
       return res.status(404).json({ error: 'Product not found in the order' });
     }
 
-    // Update the product's status
+    // Update the product's status, shipping company, and shipping company address
     product.status = status;
+    product.shippingCompany = shippingCompany
+    product.shippingCompanyAddress = shippingCompanyAddress
 
     // Save the updated order
     const updatedOrder = await order.save();
