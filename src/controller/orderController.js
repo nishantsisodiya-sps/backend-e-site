@@ -211,7 +211,7 @@ exports.getOrders = async (req, res) => {
     }
 
     if (myOrders.length === 0) {
-      return res.status(404).json('Orders not found');
+      return res.status(404).json({msg : 'Orders not found'});
     }
 
     const ordersWithProductDetails = [];
