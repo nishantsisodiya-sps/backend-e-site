@@ -362,9 +362,6 @@ exports.getSingleOrder = async function (req, res) {
 
 
 
-
-
-
 exports.deleteAllOrders = async (req, res) => {
   try {
     const userId = req.params.id;
