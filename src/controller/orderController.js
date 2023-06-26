@@ -7,7 +7,7 @@ const Product = require('../models/products')
 const Cart = require('../models/cart')
 // const { default: orders } = require('razorpay/dist/types/orders');
 const { transporter, sendEmail, getSellerEmailById, getUserEmailById } = require('../services/emailSender');
-
+const notificationController = require('../controller/notificationController')
 
 
 
@@ -52,9 +52,25 @@ exports.createOrder = async (req, res) => {
       paymentId: order.id
     });
 
-        
+
 
     const savedOrder = await newOrder.save();
+
+    
+
+    const deviceToken = "c3hDYAfRSSasb0u8rhKC8g:APA91bGNPLUCZtjvF84HkPnKhpbubwAtPOE2_giyb1SPHDKduMMGGHYxTqvrikVcDHhIjB7_6zyvhHP64gy0dQOqGdGmbiBqzQNUgHX4u7IFLpbcc-mbwm4aLV-FCID87mVQhmY9zhOa";
+
+    // Send order details as an object
+    const orderDetails = {
+      id: savedOrder._id,
+      name: savedOrder.name,
+
+      amount: savedOrder.amount
+    };
+
+    // Send notification to the driver
+    await notificationController.sendNotification_OneByOne(orderDetails, deviceToken);
+
 
 
     // Decrement the stock of each product
@@ -103,7 +119,7 @@ exports.createOrder = async (req, res) => {
         const sellerEmail = await getSellerEmailById(product.seller); // Await the function call to resolve the Promise
 
         const emailSubject = 'New Order Notification';
-        const emailText =`Hello,
+        const emailText = `Hello,
 
         You have received a new order with ID ${savedOrder._id}.
     
@@ -115,7 +131,7 @@ exports.createOrder = async (req, res) => {
     
         Regards,
         Nishant Sisodiya (Founder , Apna Market)`;
-          ;
+        ;
 
 
         // Get user email by user Id
@@ -160,6 +176,8 @@ exports.createOrder = async (req, res) => {
 
 // Update an order
 exports.updateOrder = async (req, res) => {
+
+  console.log('working================>');
   const { paymentId } = req.body;
 
   try {
@@ -187,7 +205,14 @@ exports.updateOrder = async (req, res) => {
 
 
       res.json({ orderId: savedOrder._id, status: savedOrder.status });
-    } else {
+    }
+    else if(payment.status === 'COD'){
+      await Cart.deleteMany({ user: savedOrder.userId });
+
+      res.json({ orderId: savedOrder._id, status: savedOrder.status });
+    }
+    
+    else {
       res.json({ status: payment.status });
     }
   } catch (error) {
@@ -197,11 +222,13 @@ exports.updateOrder = async (req, res) => {
 };
 
 
+
 //get orders api
 
 
 
 exports.getOrders = async (req, res) => {
+
   try {
     const userId = req.params.id;
 
@@ -213,13 +240,13 @@ exports.getOrders = async (req, res) => {
     }
 
     if (myOrders.length === 0) {
-      return res.status(404).json({msg : 'Orders not found'});
+      return res.status(404).json({ msg: 'Orders not found' });
     }
 
     const ordersWithProductDetails = [];
     for (const order of myOrders) {
       for (const myproduct of order.products) {
-  
+
         const productDetails = await Product.findById(myproduct.product._id);
         const orderWithProductDetails = {
           _id: order._id,
@@ -263,7 +290,7 @@ exports.getSingleOrder = async function (req, res) {
 
 
     const order = await Order.findById(orderId).populate('products.product');
- 
+
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -291,6 +318,8 @@ exports.getSingleOrder = async function (req, res) {
       }
     }
 
+    
+
     const productDetails = {
       id: product._id,
       title: product.title,
@@ -307,18 +336,22 @@ exports.getSingleOrder = async function (req, res) {
       sellerSoldCount
     };
 
+
+
     const orderWithProductDetails = {
       id: order._id,
       name: order.name,
       userId: order.userId,
       address: order.address,
       amount: order.amount,
-      status: order.status,
+      status: productItem.status,
       paymentId: order.paymentId,
       products: [productDetails],
       createdAt: order.createdAt,
       updatedAt: order.updatedAt
     };
+
+    // console.log('orderDetails=>' , orderWithProductDetails);
 
     res.status(200).json(orderWithProductDetails);
   } catch (error) {

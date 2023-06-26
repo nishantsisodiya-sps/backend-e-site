@@ -8,16 +8,15 @@ admins.initializeApp({
 const fcm = new FCM(serverKey);
 
 // Send Notification to the driver using 'OneByOne ALgo'
-exports.sendNotification_OneByOne = async (orderDetails) => {
-    console.log(orderDetails);
+exports.sendNotification_OneByOne = async (orderDetails , deviceToken) => {
+  console.log(deviceToken);
   try {
-    const deviceToken = "DEVICE_TOKEN";
 
     const message = {
       to: deviceToken,
       notification: {
         title: "Ecommerce app",
-        body: "Hey! ABC wants to deliver a package",
+        body: "Hey! You have a new package delivery request",
       },
       data: {
         orderId: orderDetails.id,
@@ -25,6 +24,7 @@ exports.sendNotification_OneByOne = async (orderDetails) => {
         Amount: orderDetails.amount,
       },
     };
+    console.log(message);
 
     fcm.send(message, (err, response) => {
       if (err) {
@@ -39,3 +39,35 @@ exports.sendNotification_OneByOne = async (orderDetails) => {
     console.error("Error sending notification:", error);
   }
 };
+
+
+
+// import express from 'express'
+// import bodyparser from 'body-parser'
+// import { admin } from './firebase-config'
+
+// const app = express()
+// app.use(bodyparser.json())
+
+// const notification_options = {
+//     priority: "high",
+//     timeToLive: 60 * 60 * 24
+//   };
+
+// exports.sendNotification_OneByOne = async(req, res)=>{
+
+//   const  registrationToken = req.body.registrationToken
+//   const message = req.body.message
+//   const options =  notification_options
+  
+//     admin.messaging().sendToDevice(registrationToken, message, options)
+//     .then( response => {
+
+//      res.status(200).send("Notification sent successfully")
+     
+//     })
+//     .catch( error => {
+//         console.log(error);
+//     });
+
+// }

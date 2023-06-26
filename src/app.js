@@ -14,7 +14,7 @@ const wishlistRoutes = require('./routes/wishlistRoutes')
 const addressRoutes = require('./routes/addressRoutes')
 const superAdmin = require('./routes/superAdminRoutes')
 const updateDetails = require('./routes/updateDetailsRoute')
-const notification = require('./routes/notification')
+
 const path = require('path');
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
@@ -34,7 +34,7 @@ app.use('/wishlist' , wishlistRoutes);
 app.use('/address' , addressRoutes);
 app.use('/superAdmin' , superAdmin);
 app.use('/updateProfile' , updateDetails)
-app.use('/notification' , notification)
+
 
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
