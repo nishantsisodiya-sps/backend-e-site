@@ -120,20 +120,47 @@ exports.blockSeller = async(req , res)=>{
 
 
 
-exports.getAllOrder = async(req , res)=>{
 
+exports.getAllOrder = async (req, res) => {
   try {
-    
-    let orders = await Order.find()
+    let orders = await Order.find().populate('products.product');
 
-    if(!orders){
-      res.status(404).json({msg : 'Order not found'})
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ msg: 'Order not found' });
     }
 
-    res.status(201).json({status : '201' , orders : orders})
+    let ordersWithProducts = [];
 
+    for (const order of orders) {
+      for (const product of order.products) {
+        let orderWithProduct = {
+          orderDetails: {
+            _id: order._id,
+            userId: order.userId,
+            name: order.name,
+            address: order.address,
+            amount: order.amount,
+            PaymentStatus: order.PaymentStatus,
+            paymentId: order.paymentId,
+            createdAt: order.createdAt,
+            updatedAt: order.updatedAt,
+          },
+          productDetails: {
+            product: product.product,
+            seller: product.seller,
+            quantity: product.quantity,
+            status: product.status,
+            shippingDetails: product.shippingDetails,
+          },
+        };
+
+        ordersWithProducts.push(orderWithProduct);
+      }
+    }
+
+    res.status(200).json({ status: 200, orders: ordersWithProducts });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
-
-}
+};

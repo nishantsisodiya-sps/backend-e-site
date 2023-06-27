@@ -35,8 +35,8 @@ app.use('/address' , addressRoutes);
 app.use('/superAdmin' , superAdmin);
 app.use('/updateProfile' , updateDetails)
 
-
-
+ 
+// app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

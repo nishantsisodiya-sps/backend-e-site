@@ -8,7 +8,6 @@ const Product = require('../models/products')
 
 
 exports.create = async (req, res) => {
-
   try {
     console.log("Creating a new product category...");
 

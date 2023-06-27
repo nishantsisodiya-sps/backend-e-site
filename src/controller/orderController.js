@@ -222,9 +222,7 @@ exports.updateOrder = async (req, res) => {
 };
 
 
-
 //get orders api
-
 
 
 exports.getOrders = async (req, res) => {
