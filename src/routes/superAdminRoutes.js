@@ -12,8 +12,12 @@ router.post('/blockUser/:id' , superAdminCheck , superAdminController.blockUser)
 
 router.post('/blockSeller/:id', superAdminCheck , superAdminController.blockSeller)
 
-
 router.get('/getAllOrder' , superAdminCheck , superAdminController.getAllOrder)
+
+// router.get('/getRevenueByProduct'  , superAdminController.getTotalRevenueByProduct)
+
+router.get('/getRevenue' , superAdminCheck , superAdminController.getRevenueAndOrderStats)
+
 
 
 module.exports = router

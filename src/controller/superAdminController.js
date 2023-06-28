@@ -164,3 +164,62 @@ exports.getAllOrder = async (req, res) => {
     res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
+
+
+
+exports.getRevenueAndOrderStats = async (req, res) => {
+  try {
+    // Get total revenue earned
+    const orders = await Order.find();
+    const totalRevenue = orders.reduce((acc, order) => acc + parseFloat(order.amount), 0);
+
+    // Get total order count
+    const totalOrderCount = orders.length;
+
+    // Get top 5 products by purchase count
+    const productStats = await Order.aggregate([
+      { $unwind: '$products' },
+      {
+        $group: {
+          _id: '$products.product',
+          count: { $sum: '$products.quantity' },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'productDetails',
+        },
+      },
+      { $unwind: '$productDetails' },
+      {
+        $project: {
+          _id: 0,
+          productId: '$_id',
+          count: 1,
+          name: '$productDetails.title',
+          price: '$productDetails.price',
+          thumbnail: '$productDetails.thumbnail',
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      totalRevenue,
+      totalOrderCount,
+      topProducts: productStats,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: 'Internal Server Error' });
+  }
+};
+
+
+
+
+
