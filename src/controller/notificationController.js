@@ -9,9 +9,7 @@ const fcm = new FCM(serverKey);
 
 // Send Notification to the driver using 'OneByOne ALgo'
 exports.sendNotification_OneByOne = async (orderDetails , deviceToken) => {
-  console.log(deviceToken);
   try {
-
     const message = {
       to: deviceToken,
       notification: {
@@ -34,7 +32,6 @@ exports.sendNotification_OneByOne = async (orderDetails , deviceToken) => {
       }
 
     });
-    console.log(fcm);
   } catch (error) {
     console.error("Error sending notification:", error);
   }

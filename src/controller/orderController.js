@@ -52,11 +52,7 @@ exports.createOrder = async (req, res) => {
       paymentId: order.id
     });
 
-
-
     const savedOrder = await newOrder.save();
-
-    
 
     const deviceToken = "c3hDYAfRSSasb0u8rhKC8g:APA91bGNPLUCZtjvF84HkPnKhpbubwAtPOE2_giyb1SPHDKduMMGGHYxTqvrikVcDHhIjB7_6zyvhHP64gy0dQOqGdGmbiBqzQNUgHX4u7IFLpbcc-mbwm4aLV-FCID87mVQhmY9zhOa";
 
@@ -64,21 +60,17 @@ exports.createOrder = async (req, res) => {
     const orderDetails = {
       id: savedOrder._id,
       name: savedOrder.name,
-
       amount: savedOrder.amount
     };
 
     // Send notification to the driver
     await notificationController.sendNotification_OneByOne(orderDetails, deviceToken);
 
-
-
     // Decrement the stock of each product
     for (const product of products) {
       const productDoc = await Product.findById(product.id);
       if (!productDoc) {
         res.status(404).json({ msg: 'Product not found' })
-        console.log('productDoc error');
         continue;
       }
 
@@ -86,8 +78,6 @@ exports.createOrder = async (req, res) => {
       productDoc.stock = remainingStock >= 0 ? remainingStock : 0;
       await productDoc.save();
     }
-
-
 
 
     // Increment sold count for each product and seller
@@ -117,7 +107,6 @@ exports.createOrder = async (req, res) => {
       try {
 
         const sellerEmail = await getSellerEmailById(product.seller); // Await the function call to resolve the Promise
-
         const emailSubject = 'New Order Notification';
         const emailText = `Hello,
 
@@ -135,9 +124,7 @@ exports.createOrder = async (req, res) => {
 
 
         // Get user email by user Id
-
         const userEmail = await getUserEmailById(userId);
-
         // Send email to the user with the list of purchased products
         const emailSubjectUser = 'Order Confirmation';
         const emailTextUser = `Hello,
@@ -159,6 +146,8 @@ exports.createOrder = async (req, res) => {
 
         await sendEmail(sellerEmail, emailSubject, emailText);
         await sendEmail(userEmail, emailSubjectUser, emailTextUser);
+
+
       } catch (error) {
         console.error('Error getting seller email:', error);
         // Handle the error appropriately (e.g., log, throw, or continue with the loop)
@@ -176,8 +165,6 @@ exports.createOrder = async (req, res) => {
 
 // Update an order
 exports.updateOrder = async (req, res) => {
-
-  console.log('working================>');
   const { paymentId } = req.body;
 
   try {
@@ -197,11 +184,11 @@ exports.updateOrder = async (req, res) => {
 
     if (payment.status === 'captured') {
       order.PaymentStatus = 'PAID';
+      await Cart.deleteMany({ user: savedOrder.userId });
       const savedOrder = await order.save();
 
 
       // Clear user's cart
-      await Cart.deleteMany({ user: savedOrder.userId });
 
 
       res.json({ orderId: savedOrder._id, status: savedOrder.status });
@@ -244,7 +231,7 @@ exports.getOrders = async (req, res) => {
     const ordersWithProductDetails = [];
     for (const order of myOrders) {
       for (const myproduct of order.products) {
-
+      
         const productDetails = await Product.findById(myproduct.product._id);
         const orderWithProductDetails = {
           _id: order._id,
@@ -349,7 +336,6 @@ exports.getSingleOrder = async function (req, res) {
       updatedAt: order.updatedAt
     };
 
-    // console.log('orderDetails=>' , orderWithProductDetails);
 
     res.status(200).json(orderWithProductDetails);
   } catch (error) {
@@ -363,7 +349,7 @@ exports.getSingleOrder = async function (req, res) {
 exports.deleteAllOrders = async (req, res) => {
   try {
     const userId = req.params.id;
-    console.log(req.params);
+   
 
     if (!userId) {
       return res.status(400).json({ error: 'User ID not provided' });
