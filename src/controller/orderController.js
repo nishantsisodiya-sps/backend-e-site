@@ -392,6 +392,38 @@ exports.cancelOrder = async (req, res) => {
     // Save the updated order
     const updatedOrder = await order.save();
 
+    // Send cancellation email to the product seller
+    const sellerEmail = await getSellerEmailById(product.seller);
+    const emailSubjectSeller = 'Order Cancellation';
+    const emailTextSeller = `Hello,
+
+    The following order has been cancelled:
+
+    Order ID: ${updatedOrder._id}
+    Product: ${product.product.title}
+    Quantity: ${product.quantity}
+
+    If you have any questions or need further assistance, please feel free to contact us.
+
+    Regards,
+    Nishant Sisodiya (Founder, Apna Market)`;
+
+    await sendEmail(sellerEmail, emailSubjectSeller, emailTextSeller);
+
+    // Send cancellation email to the user
+    const userEmail = await getUserEmailById(updatedOrder.userId);
+    const emailSubjectUser = 'Order Cancellation';
+    const emailTextUser = `Hello,
+
+    Your order with ID ${updatedOrder._id} has been cancelled.
+
+    If you have any questions or need further assistance, please feel free to contact us.
+
+    Regards,
+    Nishant Sisodiya (Founder, Apna Market)`;
+
+    await sendEmail(userEmail, emailSubjectUser, emailTextUser);
+
     res.json(updatedOrder);
   } catch (error) {
     console.error('Cancel order error:', error);

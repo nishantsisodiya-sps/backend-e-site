@@ -3,26 +3,27 @@ const SuperAdmin = require('../models/superAdmin');
 
 const superAdminCheck = async (req, res, next) => {
   try {
-    const token = req.header('Authorization').replace('Bearer ', '');
+    const token = req.header('Authorization');
 
     if (!token) {
       return res.status(401).json({ message: 'Authorization token not provided' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Remove 'Bearer ' prefix from the token
+    const tokenWithoutBearer = token.replace('Bearer ', '');
+
+    const decoded = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET);
 
     // Check if the decoded token belongs to a super admin
-    const superAdmin = await SuperAdmin.findOne({ id: decoded?._id, 'tokens.token': token });
-   
+    const superAdmin = await SuperAdmin.findOne({ id: decoded?._id, 'tokens.token': tokenWithoutBearer });
+
 
     // Add the super admin document to the request object
     req.superAdmin = superAdmin;
 
     if (superAdmin) {
-
       return next();
     } else {
-     
       next();
     }
   } catch (err) {

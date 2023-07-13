@@ -19,5 +19,10 @@ router.get('/getAllOrder' , superAdminCheck , superAdminController.getAllOrder)
 router.get('/getRevenue' , superAdminCheck , superAdminController.getRevenueAndOrderStats)
 
 
+router.get('/blocked-users', superAdminCheck  , superAdminController.getBlockedUsers)
+
+
+router.get('/blocked-sellers' , superAdminCheck  , superAdminController.getBlockedSellers)
+
 
 module.exports = router

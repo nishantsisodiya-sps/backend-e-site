@@ -88,6 +88,7 @@ exports.getProducts = async function (req, res, next) {
 
 //<<<<<<<======================  FETCH PRODUCT BY SELLER ID API ================>>>>>>>>
 
+
 exports.getSellerProducts = async function (req, res, next) {
   const seller = req.params.sellerId;
 
@@ -164,9 +165,7 @@ exports.deleteProduct = async function (req, res, next) {
     console.log('Delete prduct error ===>', error);
     res.status(500).json({ message: error.message })
 
-  }
-
-}
+  }}
 
 
 //<<<<<<<======================  UPDATE PRODUCT API ================>>>>>>>>

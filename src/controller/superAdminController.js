@@ -6,6 +6,7 @@ const User = require('../models/user')
 const Seller = require('../models/seller');
 const Order = require('../models/order');
 
+
 // Register a new super admin
 exports.createSuperAdmin = async (req, res) => {
   try {
@@ -96,10 +97,10 @@ exports.blockUser = async (req, res) => {
 exports.blockSeller = async(req , res)=>{
   try {
     const sellerId = req.params.id;
-
+   
 
     const seller = await Seller.findById(sellerId);
-
+ 
     if(!seller){
       res.status(404).json({message : "seller not found"})
     }
@@ -222,4 +223,24 @@ exports.getRevenueAndOrderStats = async (req, res) => {
 
 
 
+exports.getBlockedUsers = async (req, res) => {
+  try {
+    const blockedUsers = await User.find({ isBlocked: true });
+    res.status(200).json(blockedUsers);
+  } catch (error) {
+    console.log('getBlockedUsers error:', error);
+    res.status(500).json({ msg: 'Error occurred' });
+  }
+};
 
+
+
+exports.getBlockedSellers = async (req, res) => {
+  try {
+    const blockedSellers = await Seller.find({ isBlocked: true });
+    res.status(200).json(blockedSellers);
+  } catch (error) {
+    console.log('blockedSellers error:', error);
+    res.status(500).json({ msg: 'Error occurred' });
+  }
+};
