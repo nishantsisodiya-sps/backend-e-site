@@ -8,10 +8,11 @@ const superAdminCheck = require('../middleware/superAdminCheck')
 // Create a new order
 router.post('/create-order' ,auth.checkLoggedIn, createOrder);
 
+router.post('/singleOrder' ,  auth.checkLoggedIn, getSingleOrder)
+
 // Update an order
 router.post('/update-order', auth.checkLoggedIn , updateOrder);
 
-router.post('/singleOrder' ,  auth.checkLoggedIn, getSingleOrder)
 
 router.put('/cancel' ,auth.checkLoggedIn, cancelOrder)
 

@@ -1,28 +1,30 @@
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 dotenv.config();
-const Order = require('../models/order');
-const Razorpay = require('razorpay');
-const { v4: uuidv4 } = require('uuid');
-const Product = require('../models/products')
-const Cart = require('../models/cart')
+const Order = require("../models/order");
+const Razorpay = require("razorpay");
+const { v4: uuidv4 } = require("uuid");
+const Product = require("../models/products");
+const Cart = require("../models/cart");
 // const { default: orders } = require('razorpay/dist/types/orders');
-const { transporter, sendEmail, getSellerEmailById, getUserEmailById } = require('../services/emailSender');
-const notificationController = require('../controller/notificationController')
-
-
-
+const {
+  transporter,
+  sendEmail,
+  getSellerEmailById,
+  getUserEmailById,
+} = require("../services/emailSender");
+const notificationController = require("../controller/notificationController");
 
 exports.createOrder = async (req, res) => {
   const { name, userId, address, amount, products } = req.body;
 
   try {
     const razorpay = new Razorpay({
-      key_id: 'rzp_test_Tiv5oHxAC3kTlH',
-      key_secret: 'oCleWUV3s6qvUbqTsWSB0C89',
+      key_id: "rzp_test_Tiv5oHxAC3kTlH",
+      key_secret: "oCleWUV3s6qvUbqTsWSB0C89",
     });
 
     const payment_capture = 1;
-    const currency = 'INR';
+    const currency = "INR";
 
     const options = {
       amount: amount,
@@ -30,12 +32,26 @@ exports.createOrder = async (req, res) => {
       receipt: uuidv4(),
       payment_capture,
       notes: {
-        'mode': 'test'
-      }
+        mode: "test",
+      },
     };
 
     // Create order in Razorpay
     const order = await razorpay.orders.create(options);
+
+    // Calculate expected delivery date
+    const createDate = new Date();
+    const expectedDeliveryDate = new Date(createDate);
+    expectedDeliveryDate.setDate(expectedDeliveryDate.getDate() + 5);
+
+    while (expectedDeliveryDate.getDate() <= createDate.getDate()) {
+      expectedDeliveryDate.setDate(expectedDeliveryDate.getDate() + 1);
+
+      if (expectedDeliveryDate.getMonth() !== createDate.getMonth()) {
+        expectedDeliveryDate.setDate(0); // Set to the last day of the current month
+        expectedDeliveryDate.setMonth(createDate.getMonth() + 1); // Increment the month
+      }
+    }
 
     // Create order in our database
     const newOrder = new Order({
@@ -43,34 +59,39 @@ exports.createOrder = async (req, res) => {
       userId: userId,
       address: address,
       amount: amount,
-      products: products.map(product => ({
+      products: products.map((product) => ({
         product: product.id,
         seller: product.seller,
         quantity: product.quantity,
       })),
-      status: 'COD',
-      paymentId: order.id
+      status: "COD",
+      paymentId: order.id,
+      expectedDeliveryDate: expectedDeliveryDate,
     });
 
     const savedOrder = await newOrder.save();
 
-    const deviceToken = "c3hDYAfRSSasb0u8rhKC8g:APA91bGNPLUCZtjvF84HkPnKhpbubwAtPOE2_giyb1SPHDKduMMGGHYxTqvrikVcDHhIjB7_6zyvhHP64gy0dQOqGdGmbiBqzQNUgHX4u7IFLpbcc-mbwm4aLV-FCID87mVQhmY9zhOa";
+    const deviceToken =
+      "c3hDYAfRSSasb0u8rhKC8g:APA91bGNPLUCZtjvF84HkPnKhpbubwAtPOE2_giyb1SPHDKduMMGGHYxTqvrikVcDHhIjB7_6zyvhHP64gy0dQOqGdGmbiBqzQNUgHX4u7IFLpbcc-mbwm4aLV-FCID87mVQhmY9zhOa";
 
     // Send order details as an object
     const orderDetails = {
       id: savedOrder._id,
       name: savedOrder.name,
-      amount: savedOrder.amount
+      amount: savedOrder.amount,
     };
 
     // Send notification to the driver
-    await notificationController.sendNotification_OneByOne(orderDetails, deviceToken);
+    await notificationController.sendNotification_OneByOne(
+      orderDetails,
+      deviceToken
+    );
 
     // Decrement the stock of each product
     for (const product of products) {
       const productDoc = await Product.findById(product.id);
       if (!productDoc) {
-        res.status(404).json({ msg: 'Product not found' })
+        res.status(404).json({ msg: "Product not found" });
         continue;
       }
 
@@ -78,7 +99,6 @@ exports.createOrder = async (req, res) => {
       productDoc.stock = remainingStock >= 0 ? remainingStock : 0;
       await productDoc.save();
     }
-
 
     // Increment sold count for each product and seller
     for (const product of products) {
@@ -92,22 +112,21 @@ exports.createOrder = async (req, res) => {
     const sellerSoldCounts = await Product.aggregate([
       {
         $match: {
-          _id: { $in: products.map(product => product.productId) }
-        }
+          _id: { $in: products.map((product) => product.productId) },
+        },
       },
       {
         $group: {
-          _id: '$seller',
-          soldCount: { $sum: '$soldCount' }
-        }
-      }
+          _id: "$seller",
+          soldCount: { $sum: "$soldCount" },
+        },
+      },
     ]);
 
     for (const product of products) {
       try {
-
         const sellerEmail = await getSellerEmailById(product.seller); // Await the function call to resolve the Promise
-        const emailSubject = 'New Order Notification';
+        const emailSubject = "New Order Notification";
         const emailText = `Hello,
 
         You have received a new order with ID ${savedOrder._id}.
@@ -120,13 +139,10 @@ exports.createOrder = async (req, res) => {
     
         Regards,
         Nishant Sisodiya (Founder , Apna Market)`;
-        ;
-
-
         // Get user email by user Id
         const userEmail = await getUserEmailById(userId);
         // Send email to the user with the list of purchased products
-        const emailSubjectUser = 'Order Confirmation';
+        const emailSubjectUser = "Order Confirmation";
         const emailTextUser = `Hello,
 
     Thank you for your order! Here are the details of your purchase:
@@ -134,7 +150,9 @@ exports.createOrder = async (req, res) => {
     Order ID: ${savedOrder._id}
 
     Products:
-    ${products.map(product => `- ${product.title} (Quantity: ${product.quantity})`).join('\n')}
+    ${products
+      .map((product) => `- ${product.title} (Quantity: ${product.quantity})`)
+      .join("\n")}
 
     Total Amount: ${amount} INR
 
@@ -143,23 +161,26 @@ exports.createOrder = async (req, res) => {
     Regards,
     Nishant Sisodiya (Founder , Apna Market)`;
 
-
         await sendEmail(sellerEmail, emailSubject, emailText);
         await sendEmail(userEmail, emailSubjectUser, emailTextUser);
-
-
       } catch (error) {
-        console.error('Error getting seller email:', error);
+        console.error("Error getting seller email:", error);
         // Handle the error appropriately (e.g., log, throw, or continue with the loop)
       }
     }
 
-    res.json({ orderId: savedOrder._id, razorpayOrderId: order, sellerSoldCounts });
+    res.json({
+      orderId: savedOrder._id,
+      razorpayOrderId: order,
+      sellerSoldCounts,
+    });
   } catch (error) {
-    console.error('Create order error=========>', error);
-    res.status(500).json({ error: 'Unable to create order' });
+    console.error("Create order error=========>", error);
+    res.status(500).json({ error: "Unable to create order" });
   }
 };
+
+
 
 
 
@@ -170,68 +191,59 @@ exports.updateOrder = async (req, res) => {
   try {
     // Capture the payment
     const razorpay = new Razorpay({
-      key_id: 'rzp_test_Tiv5oHxAC3kTlH',
-      key_secret: 'oCleWUV3s6qvUbqTsWSB0C89'
+      key_id: "rzp_test_Tiv5oHxAC3kTlH",
+      key_secret: "oCleWUV3s6qvUbqTsWSB0C89",
     });
     const payment = await razorpay.payments.fetch(paymentId);
 
-    const id = payment.order_id
+    const id = payment.order_id;
 
     // Update the order status
     const order = await Order.findOne({ paymentId: id });
 
-    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!order) return res.status(404).json({ error: "Order not found" });
 
-    if (payment.status === 'captured') {
-      order.PaymentStatus = 'PAID';
+    if (payment.status === "captured") {
+      order.PaymentStatus = "PAID";
       await Cart.deleteMany({ user: savedOrder.userId });
       const savedOrder = await order.save();
 
-
       // Clear user's cart
 
-
       res.json({ orderId: savedOrder._id, status: savedOrder.status });
-    }
-    else if(payment.status === 'COD'){
+    } else if (payment.status === "COD") {
       await Cart.deleteMany({ user: savedOrder.userId });
 
       res.json({ orderId: savedOrder._id, status: savedOrder.status });
-    }
-    
-    else {
+    } else {
       res.json({ status: payment.status });
     }
   } catch (error) {
-    console.error('Update order error=======>', error);
-    res.status(500).json({ error: 'Unable to update order' });
+    console.error("Update order error=======>", error);
+    res.status(500).json({ error: "Unable to update order" });
   }
 };
 
 
-//get orders api
-
 
 exports.getOrders = async (req, res) => {
-
   try {
     const userId = req.params.id;
 
     let myOrders;
     if (userId) {
-      myOrders = await Order.find({ userId }).populate('products.product');
+      myOrders = await Order.find({ userId }).populate("products.product");
     } else {
-      return res.status(400).send('Please provide either userId or sellerId');
+      return res.status(400).send("Please provide either userId or sellerId");
     }
 
     if (myOrders.length === 0) {
-      return res.status(404).json({ msg: 'Orders not found' });
+      return res.status(404).json({ msg: "Orders not found" });
     }
 
     const ordersWithProductDetails = [];
     for (const order of myOrders) {
       for (const myproduct of order.products) {
-      
         const productDetails = await Product.findById(myproduct.product._id);
         const orderWithProductDetails = {
           _id: order._id,
@@ -248,6 +260,7 @@ exports.getOrders = async (req, res) => {
             status: myproduct.status,
             shippingDetails: myproduct.shippingDetails,
           },
+          expectedDeliveryDate : order.expectedDeliveryDate,
           createdAt: order.createdAt,
           updatedAt: order.updatedAt,
         };
@@ -255,29 +268,30 @@ exports.getOrders = async (req, res) => {
       }
     }
 
+    // Sort the orders by descending order of createdAt
+    ordersWithProductDetails.sort((a, b) => b.createdAt - a.createdAt);
+
     res.status(200).json(ordersWithProductDetails);
   } catch (error) {
-    console.log('getOrders error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.log("getOrders error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 
 
 
-
-
 exports.getSingleOrder = async function (req, res) {
   try {
+    console.log("working");
+    console.log(req.body);
+    const orderId = req.body.orderId;
+    const productId = req.body.productId;
 
-    const orderId = req.body.orderId
-    const productId = req.body.productId
-
-
-    const order = await Order.findById(orderId).populate('products.product');
-
+    const order = await Order.findById(orderId).populate("products.product");
+    console.log("order======>", order);
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
 
     const productItem = order.products.find(
@@ -285,7 +299,7 @@ exports.getSingleOrder = async function (req, res) {
     );
 
     if (!productItem) {
-      return res.status(404).json({ message: 'Product not found in order' });
+      return res.status(404).json({ message: "Product not found in order" });
     }
 
     const product = productItem.product;
@@ -296,14 +310,12 @@ exports.getSingleOrder = async function (req, res) {
     if (product && seller) {
       const sellerSoldCounts = await Product.aggregate([
         { $match: { _id: product, seller } },
-        { $group: { _id: '$seller', soldCount: { $sum: '$soldCount' } } }
+        { $group: { _id: "$seller", soldCount: { $sum: "$soldCount" } } },
       ]);
       if (sellerSoldCounts.length > 0) {
         sellerSoldCount = sellerSoldCounts[0].soldCount;
       }
     }
-
-    
 
     const productDetails = {
       id: product._id,
@@ -318,10 +330,8 @@ exports.getSingleOrder = async function (req, res) {
       brand: product.brand,
       category: product.category,
       quantity,
-      sellerSoldCount
+      sellerSoldCount,
     };
-
-
 
     const orderWithProductDetails = {
       id: order._id,
@@ -333,9 +343,9 @@ exports.getSingleOrder = async function (req, res) {
       paymentId: order.paymentId,
       products: [productDetails],
       createdAt: order.createdAt,
-      updatedAt: order.updatedAt
+      updatedAt: order.updatedAt,
+      expectedDeliveryDate : order.expectedDeliveryDate,
     };
-
 
     res.status(200).json(orderWithProductDetails);
   } catch (error) {
@@ -344,28 +354,23 @@ exports.getSingleOrder = async function (req, res) {
   }
 };
 
-
-
 exports.deleteAllOrders = async (req, res) => {
   try {
     const userId = req.params.id;
-   
 
     if (!userId) {
-      return res.status(400).json({ error: 'User ID not provided' });
+      return res.status(400).json({ error: "User ID not provided" });
     }
 
     // Delete all orders with the specified userId
     await Order.deleteMany({ userId });
 
-    res.status(200).json({ message: 'All orders deleted successfully' });
+    res.status(200).json({ message: "All orders deleted successfully" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: 'Unable to delete orders' });
+    res.status(500).json({ error: "Unable to delete orders" });
   }
 };
-
-
 
 // Cancel an order
 exports.cancelOrder = async (req, res) => {
@@ -376,25 +381,27 @@ exports.cancelOrder = async (req, res) => {
     const order = await Order.findById(orderId);
 
     if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
+      return res.status(404).json({ error: "Order not found" });
     }
 
     // Find the product in the order's products array with the given product ID
-    const product = order.products.find((product) => product.product.toString() === productId);
+    const product = order.products.find(
+      (product) => product.product.toString() === productId
+    );
 
     if (!product) {
-      return res.status(404).json({ error: 'Product not found in the order' });
+      return res.status(404).json({ error: "Product not found in the order" });
     }
 
     // Update the product's status to "Cancelled"
-    product.status = 'Cancelled';
+    product.status = "Cancelled";
 
     // Save the updated order
     const updatedOrder = await order.save();
 
     // Send cancellation email to the product seller
     const sellerEmail = await getSellerEmailById(product.seller);
-    const emailSubjectSeller = 'Order Cancellation';
+    const emailSubjectSeller = "Order Cancellation";
     const emailTextSeller = `Hello,
 
     The following order has been cancelled:
@@ -412,7 +419,7 @@ exports.cancelOrder = async (req, res) => {
 
     // Send cancellation email to the user
     const userEmail = await getUserEmailById(updatedOrder.userId);
-    const emailSubjectUser = 'Order Cancellation';
+    const emailSubjectUser = "Order Cancellation";
     const emailTextUser = `Hello,
 
     Your order with ID ${updatedOrder._id} has been cancelled.
@@ -426,7 +433,7 @@ exports.cancelOrder = async (req, res) => {
 
     res.json(updatedOrder);
   } catch (error) {
-    console.error('Cancel order error:', error);
-    res.status(500).json({ error: 'Unable to cancel order' });
+    console.error("Cancel order error:", error);
+    res.status(500).json({ error: "Unable to cancel order" });
   }
 };

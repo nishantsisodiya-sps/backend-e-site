@@ -1,38 +1,6 @@
 const Address = require('../models/address')
 
-
-// exports.createAddress = async (req, res) => {
-//     try {
-//         const userId = req.user ? req.user._id : req.seller._id;
-//       const { fullName, addressLine1, addressLine2, city, state, postalCode, country, phone } = req.body;
-//       console.log(req.body);
-  
-//       const address = new Address({
-//         userId,
-//         fullName,
-//         addressLine1,
-//         addressLine2,
-//         city,
-//         state,
-//         postalCode,
-//         country,
-//         phone,
-//       });
-  
-//       await address.save();
-//       res.status(201).json({
-//         message: "Address created successfully",
-//         address: address,
-//       });
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({
-//         error: "Server error",
-//       });
-//     }
-//   };
-
-
+//<<<<<<<====================== Create Address API ================>>>>>>>>
 
 
 exports.createAddress = async (req, res) => {
@@ -73,7 +41,9 @@ exports.createAddress = async (req, res) => {
 
 
 
-  // Get Address by ID
+//<<<<<<<====================== Get Address by ID API ================>>>>>>>>
+
+
 exports.getAddressById = async (req, res) => {
     try {
       const addressId = req.params.id;
@@ -98,8 +68,9 @@ exports.getAddressById = async (req, res) => {
   };
   
 
+//<<<<<<<====================== Update Address API ================>>>>>>>>
 
-  // Update Address by ID
+
 exports.updateAddressById = async (req, res) => {
     try {
       const addressId = req.params.id;
@@ -137,8 +108,9 @@ exports.updateAddressById = async (req, res) => {
   };
 
   
-  
-  // Delete Address by ID
+  //<<<<<<<====================== Delete Address API ================>>>>>>>>
+
+
   exports.deleteAddressById = async (req, res) => {
     try {
       const addressId = req.params.id;
@@ -162,6 +134,8 @@ exports.updateAddressById = async (req, res) => {
 
 
 
+  //<<<<<<<====================== Get All Addresses API ================>>>>>>>>
+
   exports.getAllAddresses = async (req, res) => {
    
     try {
@@ -182,6 +156,7 @@ exports.updateAddressById = async (req, res) => {
   };
 
 
+//<<<<<<<====================== Set Default Address API ================>>>>>>>>
 
 
   exports.setDefaultAddress = async (req, res) => {

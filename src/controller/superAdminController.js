@@ -244,3 +244,6 @@ exports.getBlockedSellers = async (req, res) => {
     res.status(500).json({ msg: 'Error occurred' });
   }
 };
+
+
+

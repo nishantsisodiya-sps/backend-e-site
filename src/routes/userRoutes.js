@@ -13,7 +13,7 @@ router.post('/login', userController.loginUser);
 // Get user profile
 router.get('/profile/:id', 
 
-authMiddleware.authenticateUser,
+superAdminCheck.authenticateUserOrSuperAdmin,
  userController.getProfile);
 
 
