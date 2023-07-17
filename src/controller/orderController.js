@@ -14,6 +14,10 @@ const {
 } = require("../services/emailSender");
 const notificationController = require("../controller/notificationController");
 
+
+//<<<<<<<======================  CREATE AND SAVE A NEW ORDER ================>>>>>>>>
+
+
 exports.createOrder = async (req, res) => {
   const { name, userId, address, amount, products } = req.body;
 
@@ -181,7 +185,7 @@ exports.createOrder = async (req, res) => {
 };
 
 
-
+//<<<<<<<======================  UPDATE THE CREATED ORDER AFTER PAYMENT ================>>>>>>>>
 
 
 // Update an order
@@ -225,6 +229,7 @@ exports.updateOrder = async (req, res) => {
 };
 
 
+//<<<<<<<====================== GET ALL THE ORDERS ================>>>>>>>>
 
 exports.getOrders = async (req, res) => {
   try {
@@ -279,6 +284,7 @@ exports.getOrders = async (req, res) => {
 };
 
 
+//<<<<<<<======================  GET SINGLE ORDER ================>>>>>>>>
 
 
 exports.getSingleOrder = async function (req, res) {
@@ -354,6 +360,10 @@ exports.getSingleOrder = async function (req, res) {
   }
 };
 
+
+//<<<<<<<======================  DELETE ALL THE ORDERS FOR PERTICULAR USER ================>>>>>>>>
+
+
 exports.deleteAllOrders = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -372,7 +382,12 @@ exports.deleteAllOrders = async (req, res) => {
   }
 };
 
-// Cancel an order
+
+
+  //<<<<<<<======================  CANCLE ORDER ================>>>>>>>>
+
+
+
 exports.cancelOrder = async (req, res) => {
   try {
     const { orderId, productId } = req.body;

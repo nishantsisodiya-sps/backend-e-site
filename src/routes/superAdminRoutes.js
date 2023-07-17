@@ -8,21 +8,21 @@ router.post('/register'  , superAdminController.createSuperAdmin)
 
 router.post('/login'  , superAdminController.loginSuperAdmin)
 
-router.post('/blockUser/:id' , superAdminCheck , superAdminController.blockUser)
+router.post('/blockUser/:id' , superAdminCheck.superAdminCheck , superAdminController.blockUser)
 
-router.post('/blockSeller/:id', superAdminCheck , superAdminController.blockSeller)
+router.post('/blockSeller/:id', superAdminCheck.superAdminCheck , superAdminController.blockSeller)
 
-router.get('/getAllOrder' , superAdminCheck , superAdminController.getAllOrder)
+router.get('/getAllOrder' , superAdminCheck.superAdminCheck , superAdminController.getAllOrder)
 
 // router.get('/getRevenueByProduct'  , superAdminController.getTotalRevenueByProduct)
 
-router.get('/getRevenue' , superAdminCheck , superAdminController.getRevenueAndOrderStats)
+router.get('/getRevenue' , superAdminCheck.superAdminCheck , superAdminController.getRevenueAndOrderStats)
 
 
-router.get('/blocked-users', superAdminCheck  , superAdminController.getBlockedUsers)
+router.get('/blocked-users', superAdminCheck.superAdminCheck  , superAdminController.getBlockedUsers)
 
 
-router.get('/blocked-sellers' , superAdminCheck  , superAdminController.getBlockedSellers)
+router.get('/blocked-sellers' , superAdminCheck.superAdminCheck  , superAdminController.getBlockedSellers)
 
 
 module.exports = router

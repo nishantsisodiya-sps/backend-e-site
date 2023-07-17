@@ -1,24 +1,23 @@
-const express = require('express');
-const productController = require('../controller/productController');
-const authMiddleware = require('../middleware/authMiddleware');
-const verifySeller = require('../middleware/verifySeller');
-const uploadMiddleware = require('../middleware/uploadMiddleware');
-const checkToken = require('../middleware/checkerMiddleware')
+const express = require("express");
+const productController = require("../controller/productController");
+const authMiddleware = require("../middleware/authMiddleware");
+const verifySeller = require("../middleware/verifySeller");
+const uploadMiddleware = require("../middleware/uploadMiddleware");
+const checkToken = require("../middleware/checkerMiddleware");
 const router = express.Router();
-const superAdminCheck = require('../middleware/superAdminCheck')
-
+const superAdminCheck = require("../middleware/superAdminCheck");
 
 // Get all products
-router.get('/', productController.getProducts);
+router.get("/", productController.getProducts);
 
-
-router.get('/search', productController.searchProduct)
+router.get("/search", productController.searchProduct);
 
 // Get single product by ID
-router.get('/:id', checkToken.checkToken, productController.getSingleProduct);
+router.get("/:id", productController.getSingleProduct);
 
 // Add a new product
-router.post('/add',
+router.post(
+  "/add",
 
   authMiddleware.authenticateSeller,
   verifySeller,
@@ -26,28 +25,26 @@ router.post('/add',
   productController.addProduct
 );
 
-
 // Get all products of a seller
-router.get('/seller/:sellerId',
-
-  // [superAdminCheck, authMiddleware.authenticateSeller],
+router.get(
+  "/seller/:sellerId",
+  superAdminCheck.authenticateSellerOrSuperAdmin,
   productController.getSellerProducts
 );
 
-
-router.patch('/:id',
+router.patch(
+  "/:id",
 
   authMiddleware.authenticateSeller,
   uploadMiddleware.upload,
   productController.updateProduct
-)
+);
 
-
-router.delete('/:id',
+router.delete(
+  "/:id",
 
   authMiddleware.authenticateSeller,
   productController.deleteProduct
-)
-
+);
 
 module.exports = router;

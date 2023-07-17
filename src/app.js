@@ -3,24 +3,37 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const cors = require('cors');
+const redis = require('redis')
+
+
 const sellerRoutes = require('./routes/sellerRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
-const orderRoutes = require('./routes/orderRoutes')
-const supportRoutes = require('./routes/supportRoutes')
-const categoryRoutes = require('./routes/categoryRoutes')
-const wishlistRoutes = require('./routes/wishlistRoutes')
-const addressRoutes = require('./routes/addressRoutes')
-const superAdmin = require('./routes/superAdminRoutes')
-const updateDetails = require('./routes/updateDetailsRoute')
+const orderRoutes = require('./routes/orderRoutes');
+const supportRoutes = require('./routes/supportRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
+const addressRoutes = require('./routes/addressRoutes');
+const superAdmin = require('./routes/superAdminRoutes');
+const updateDetails = require('./routes/updateDetailsRoute');
 
+
+;
 const path = require('path');
-const bodyParser = require('body-parser')
-app.use(bodyParser.json())
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
 
 // Middleware
 app.use(cors());
+
+
+
+//Implementing redis cache
+const client = redis.createClient({ legacyMode : true });
+client.connect();  
+
+
 
 // Routes
 app.use('/sellers', sellerRoutes);
@@ -33,13 +46,16 @@ app.use('/category' , categoryRoutes);
 app.use('/wishlist' , wishlistRoutes);
 app.use('/address' , addressRoutes);
 app.use('/superAdmin' , superAdmin);
-app.use('/updateProfile' , updateDetails)
+app.use('/updateProfile' , updateDetails);
+
 
  
 // app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+
 
 // MongoDB Atlas connection
 mongoose.connect('mongodb+srv://nishantsisodiya:W9Ts90851N3QErRE@ecommcluster.ducmlqt.mongodb.net/?retryWrites=true&w=majority', {
@@ -50,6 +66,8 @@ mongoose.connect('mongodb+srv://nishantsisodiya:W9Ts90851N3QErRE@ecommcluster.du
   .catch((err) => {
     console.error(err);
   });
+
+
 
 
 // Start the server

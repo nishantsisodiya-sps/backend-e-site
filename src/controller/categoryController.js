@@ -208,7 +208,7 @@ exports.update = (req, res) => {
     });
 };
 
-
+//<<<<<<<====================== GET PRODUCTS BY CATEGORY CATEGORY ================>>>>>>>>
 
 
 exports.getProductsByCategory = (req, res) => {

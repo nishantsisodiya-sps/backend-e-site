@@ -10,7 +10,7 @@ router.get('/' , productCategories.findAll);
 router.get('/:productCategoryId' , productCategories.getProductsByCategory);
 
 // Create a new Product Category
-router.post('/productCategories',superAdminCheck , productCategories.create);
+router.post('/productCategories',superAdminCheck.superAdminCheck , productCategories.create);
   
   
 // Retrieve a single Product Category with productCategoryId
@@ -18,11 +18,11 @@ router.get('/productCategories/:productCategoryId' , productCategories.findOne);
 
   
 // Update a Product Category with productCategoryId
-router.put('/productCategories/:productCategoryId', superAdminCheck , productCategories.update);
+router.put('/productCategories/:productCategoryId', superAdminCheck.superAdminCheck , productCategories.update);
 
   
 // Delete a Product Category with productCategoryId
-router.delete('/productCategories/:productCategoryId',superAdminCheck , productCategories.delete);
+router.delete('/productCategories/:productCategoryId',superAdminCheck.superAdminCheck , productCategories.delete);
 
 
 
