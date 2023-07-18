@@ -11,7 +11,7 @@ client.connect();
 client.on('error', (error) => {
   console.error('Redis client error:', error);
 });
-
+const cacheUtils = require('../utils/invalidation-cache')
 
 //<<<<<<<====================== ADD PRODUCTS API ================>>>>>>>>
 
@@ -60,7 +60,7 @@ exports.addProduct = async (req, res) => {
       .save()
       .then((product) => {
         // Invalidate the products cache
-        invalidateCache('products:*');
+        cacheUtils.invalidateProductsCache('products:*');
         res.send(product);
       })
       .catch((err) => console.log(err));
@@ -105,7 +105,7 @@ exports.getProducts = async function (req, res, next) {
         };
 
         // Cache the products in Redis
-        client.setex(`products:page${page}`, 3600, JSON.stringify(response));
+        client.set(`products:page${page}`, JSON.stringify(response));
 
         res.status(200).json(response);
       }
@@ -180,7 +180,7 @@ exports.getSingleProduct = async function (req, res, next) {
         product.isWishlist = isProductInWishlist;
 
         // Cache the product in Redis
-        client.setex(`product:${productId}`, 3600, JSON.stringify(product));
+        client.set(`product:${productId}`, JSON.stringify(product));
 
         res.send(product);
       }
@@ -211,8 +211,7 @@ exports.deleteProduct = async function (req, res, next) {
     await products.findByIdAndDelete(productId);
 
     // Invalidate the products cache and single product cache
-    invalidateCache(`products:page*`);
-    invalidateCache(`product:${productId}`);
+    cacheUtils.invalidateProductsCache('products:*');
 
     res.status(200).json({ message: 'Product Deleted successfully' });
   } catch (error) {
@@ -256,8 +255,7 @@ exports.updateProduct = async function (req, res) {
     );
 
     // Invalidate the products cache and single product cache
-    invalidateCache(`products:page*`);
-    invalidateCache(`product:${productId}`);
+    cacheUtils.invalidateProductsCache('products:*');
 
     res.status(200).json({ message: 'Product Updated successfully', product: updatedProduct });
   } catch (error) {
@@ -291,22 +289,3 @@ exports.searchProduct = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-//<<<<<<<====================== Function to invalidate the cache for a specific key or pattern ================>>>>>>>>
-
-function invalidateCache(keyPattern) {
-  client.keys(keyPattern, (error, keys) => {
-    if (error) {
-      console.error(error);
-    }
-
-    if (keys.length > 0) {
-      client.del(keys, (delError, count) => {
-        if (delError) {
-          console.error(delError);
-        }
-        console.log(`Cache cleared for keys: ${keys}. Count: ${count}`);
-      });
-    }
-  });
-}

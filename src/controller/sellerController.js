@@ -4,8 +4,19 @@ const Order = require('../models/order');
 const mongoose = require('mongoose');
 const Product = require('../models/products')
 
+const redis = require("redis");
+const client = redis.createClient({ legacyMode: true });
+client.connect();
 
-// Register a new seller
+// Handle Redis client errors
+client.on("error", (error) => {
+  console.error("Redis client error:", error);
+});
+
+const cacheUtils = require('../utils/invalidation-cache')
+
+//<<<<<<<======================  REGISTER A NEW SELLER ================>>>>>>>>
+
 exports.registerSeller = async (req, res) => {
   try {
      const { name, email, password, phone } = req.body;
@@ -37,8 +48,8 @@ exports.registerSeller = async (req, res) => {
   }
 };
 
+//<<<<<<<====================== SELLER LOGIN ================>>>>>>>>
 
-// Login a seller
 exports.loginSeller = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -67,7 +78,7 @@ exports.loginSeller = async (req, res) => {
   }
 };
 
-
+//<<<<<<<====================== GET SELLER PROFILE ================>>>>>>>>
 
 exports.getProfile = async (req, res) => {
   try {
@@ -85,7 +96,7 @@ exports.getProfile = async (req, res) => {
 
 
 
-
+//<<<<<<<====================== GET SOLD PRODUCTS OF A PERTICULAR SELLER ================>>>>>>>>
 
 exports.getSoldProductsSeller = async (req, res) => {
   try {
@@ -158,7 +169,7 @@ exports.getSoldProductsSeller = async (req, res) => {
 };
 
 
-
+//<<<<<<<======================  REGISTER A NEW SELLER ================>>>>>>>>
 
 
 exports.getSoldProducts = async (req, res) => {
@@ -213,6 +224,8 @@ exports.getSoldProducts = async (req, res) => {
 };
 
 
+//<<<<<<<====================== GET ALL SELLERS DETAILS ================>>>>>>>>
+
 exports.getSellers = async (req , res)=>{
   
   try {
@@ -230,6 +243,9 @@ exports.getSellers = async (req , res)=>{
   }
 
 }
+
+
+//<<<<<<<====================== UPDATE PRODUCT STATUS ================>>>>>>>>
 
 
 
@@ -253,11 +269,20 @@ exports.updateStatus = async (req, res) => {
 
     // Update the product's status, shipping company, and shipping company address
     product.status = status;
-    product.shippingCompany = shippingCompany
-    product.shippingCompanyAddress = shippingCompanyAddress
+    product.shippingDetails = {
+      shippingCompany,
+      shippingCompanyAddress,
+    };
 
     // Save the updated order
     const updatedOrder = await order.save();
+
+    // Invalidate the cache for the corresponding single order
+    cacheUtils.invalidateSingleOrderCache(orderId, productId);
+
+    // Invalidate the cache for the Get orders
+    const userId = order.userId.toString();
+    cacheUtils.invalidateUserOrdersCache(userId);
 
     res.json(updatedOrder);
   } catch (error) {
@@ -267,8 +292,7 @@ exports.updateStatus = async (req, res) => {
 };
 
 
-
-
+//<<<<<<<======================  GET PRODUCTS STOCK AND SOLD COUNTS ================>>>>>>>>
 
 
 exports.getProductStockAndSoldCount = async (req, res) => {

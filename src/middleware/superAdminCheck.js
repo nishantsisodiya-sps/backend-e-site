@@ -34,9 +34,6 @@ const superAdminCheck = async (req, res, next) => {
 };
 
 
-
- 
-
 const authenticateUserOrSuperAdmin = async (req, res, next) => {
   try {
     const token = req.header('Authorization');
@@ -51,7 +48,7 @@ const authenticateUserOrSuperAdmin = async (req, res, next) => {
     const decoded = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET);
 
     // Check if the decoded token belongs to a user
-    const user = await User.findOne({ _id: decoded._id, 'tokens.token': tokenWithoutBearer });
+    const user = await User.findOne({id: decoded._id, 'tokens.token': tokenWithoutBearer });
     if (user) {
       req.user = user;
       return next();
@@ -89,7 +86,8 @@ const authenticateSellerOrSuperAdmin = async (req, res, next) => {
     const decoded = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET);
 
     // Check if the decoded token belongs to a seller
-    const seller = await Seller.findOne({ _id: decoded._id, 'tokens.token': tokenWithoutBearer });
+    const seller = await Seller.findOne({id: decoded._id, 'tokens.token': tokenWithoutBearer });
+  
     if (seller) {
       req.seller = seller;
       return next();
@@ -97,7 +95,6 @@ const authenticateSellerOrSuperAdmin = async (req, res, next) => {
 
     // Check if the decoded token belongs to a super admin
     const superAdmin = await SuperAdmin.findOne({ id: decoded?._id, 'tokens.token': tokenWithoutBearer });
-    console.log(superAdmin);
     if (superAdmin) {
       req.superAdmin = superAdmin;
       return next();

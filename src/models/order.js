@@ -48,14 +48,18 @@ const OrderSchema = new mongoose.Schema(
           enum: ["Placed", "Packed", "Shipped", "Delivered", "Cancelled"],
           default: "Placed",
         },
-        shippingCompany: {
-          type: String,
-          required: false,
-        },
-        shippingCompanyAddress: {
-          type: String,
-          required: false,
-        },
+        shippingDetails:[
+          {
+            shippingCompany: {
+              type: String,
+              required: false,
+            },
+            shippingCompanyAddress: {
+              type: String,
+              required: false,
+            },
+          }
+        ]
       },
     ],
     createDate: {

@@ -13,13 +13,19 @@ const {
   getUserEmailById,
 } = require("../services/emailSender");
 const notificationController = require("../controller/notificationController");
+const redis = require("redis");
+const client = redis.createClient({ legacyMode: true });
+client.connect();
 
+// Handle Redis client errors
+client.on("error", (error) => {
+  console.error("Redis client error:", error);
+});
 
 //<<<<<<<======================  CREATE AND SAVE A NEW ORDER ================>>>>>>>>
 
-
 exports.createOrder = async (req, res) => {
-  const { name, userId, address, amount, products } = req.body;
+  const { name, userId, address, amount, products, deviceToken } = req.body;
 
   try {
     const razorpay = new Razorpay({
@@ -74,9 +80,6 @@ exports.createOrder = async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
-
-    const deviceToken =
-      "c3hDYAfRSSasb0u8rhKC8g:APA91bGNPLUCZtjvF84HkPnKhpbubwAtPOE2_giyb1SPHDKduMMGGHYxTqvrikVcDHhIjB7_6zyvhHP64gy0dQOqGdGmbiBqzQNUgHX4u7IFLpbcc-mbwm4aLV-FCID87mVQhmY9zhOa";
 
     // Send order details as an object
     const orderDetails = {
@@ -184,9 +187,7 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-
 //<<<<<<<======================  UPDATE THE CREATED ORDER AFTER PAYMENT ================>>>>>>>>
-
 
 // Update an order
 exports.updateOrder = async (req, res) => {
@@ -228,141 +229,161 @@ exports.updateOrder = async (req, res) => {
   }
 };
 
-
 //<<<<<<<====================== GET ALL THE ORDERS ================>>>>>>>>
 
 exports.getOrders = async (req, res) => {
   try {
     const userId = req.params.id;
+    const cacheKey = `orders:${userId}`;
 
-    let myOrders;
-    if (userId) {
-      myOrders = await Order.find({ userId }).populate("products.product");
-    } else {
-      return res.status(400).send("Please provide either userId or sellerId");
-    }
-
-    if (myOrders.length === 0) {
-      return res.status(404).json({ msg: "Orders not found" });
-    }
-
-    const ordersWithProductDetails = [];
-    for (const order of myOrders) {
-      for (const myproduct of order.products) {
-        const productDetails = await Product.findById(myproduct.product._id);
-        const orderWithProductDetails = {
-          _id: order._id,
-          userId: order.userId,
-          name: order.name,
-          address: order.address,
-          amount: order.amount,
-          PaymentStatus: order.PaymentStatus,
-          paymentId: order.paymentId,
-          product: {
-            product: productDetails,
-            seller: myproduct.seller,
-            quantity: myproduct.quantity,
-            status: myproduct.status,
-            shippingDetails: myproduct.shippingDetails,
-          },
-          expectedDeliveryDate : order.expectedDeliveryDate,
-          createdAt: order.createdAt,
-          updatedAt: order.updatedAt,
-        };
-        ordersWithProductDetails.push(orderWithProductDetails);
+    client.get(cacheKey, async (err, cachedData) => {
+      if (err) {
+        console.error("Redis get error:", err);
       }
-    }
 
-    // Sort the orders by descending order of createdAt
-    ordersWithProductDetails.sort((a, b) => b.createdAt - a.createdAt);
+      if (cachedData) {
+        const ordersWithProductDetails = JSON.parse(cachedData);
+        return res.status(200).json(ordersWithProductDetails);
+      }
 
-    res.status(200).json(ordersWithProductDetails);
+      let myOrders;
+      if (userId) {
+        myOrders = await Order.find({ userId }).populate("products.product");
+      } else {
+        return res.status(400).send("Please provide either userId or sellerId");
+      }
+
+      if (myOrders.length === 0) {
+        return res.status(404).json({ msg: "Orders not found" });
+      }
+
+      const ordersWithProductDetails = [];
+      for (const order of myOrders) {
+        for (const myproduct of order.products) {
+          const productDetails = await Product.findById(myproduct.product._id);
+          const orderWithProductDetails = {
+            _id: order._id,
+            userId: order.userId,
+            name: order.name,
+            address: order.address,
+            amount: order.amount,
+            PaymentStatus: order.PaymentStatus,
+            paymentId: order.paymentId,
+            product: {
+              product: productDetails,
+              seller: myproduct.seller,
+              quantity: myproduct.quantity,
+              status: myproduct.status,
+              shippingDetails: myproduct.shippingDetails,
+            },
+            expectedDeliveryDate: order.expectedDeliveryDate,
+            createdAt: order.createdAt,
+            updatedAt: order.updatedAt,
+          };
+          ordersWithProductDetails.push(orderWithProductDetails);
+        }
+      }
+
+      ordersWithProductDetails.sort((a, b) => b.createdAt - a.createdAt);
+
+      client.setEx(cacheKey, 3600, JSON.stringify(ordersWithProductDetails));
+
+      res.status(200).json(ordersWithProductDetails);
+    });
   } catch (error) {
     console.log("getOrders error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-
 //<<<<<<<======================  GET SINGLE ORDER ================>>>>>>>>
 
 
-exports.getSingleOrder = async function (req, res) {
+exports.getSingleOrder = async (req, res) => {
   try {
-    console.log("working");
-    console.log(req.body);
     const orderId = req.body.orderId;
     const productId = req.body.productId;
+    const cacheKey = `singleOrder:${orderId}:${productId}`;
 
-    const order = await Order.findById(orderId).populate("products.product");
-    console.log("order======>", order);
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    const productItem = order.products.find(
-      (item) => item.product._id.toString() === productId
-    );
-
-    if (!productItem) {
-      return res.status(404).json({ message: "Product not found in order" });
-    }
-
-    const product = productItem.product;
-    const seller = productItem.seller;
-    const quantity = productItem.quantity;
-
-    let sellerSoldCount = 0;
-    if (product && seller) {
-      const sellerSoldCounts = await Product.aggregate([
-        { $match: { _id: product, seller } },
-        { $group: { _id: "$seller", soldCount: { $sum: "$soldCount" } } },
-      ]);
-      if (sellerSoldCounts.length > 0) {
-        sellerSoldCount = sellerSoldCounts[0].soldCount;
+    client.get(cacheKey, async (err, cachedData) => {
+      if (err) {
+        console.error("Redis get error:", err);
       }
-    }
 
-    const productDetails = {
-      id: product._id,
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      thumbnail: product.thumbnail,
-      rating: product.rating,
-      discountPercentage: product.discountPercentage,
-      stock: product.stock,
-      images: product.images,
-      brand: product.brand,
-      category: product.category,
-      quantity,
-      sellerSoldCount,
-    };
+      if (cachedData) {
+        const orderWithProductDetails = JSON.parse(cachedData);
+        return res.status(200).json(orderWithProductDetails);
+      }
 
-    const orderWithProductDetails = {
-      id: order._id,
-      name: order.name,
-      userId: order.userId,
-      address: order.address,
-      amount: order.amount,
-      status: productItem.status,
-      paymentId: order.paymentId,
-      products: [productDetails],
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt,
-      expectedDeliveryDate : order.expectedDeliveryDate,
-    };
+      const order = await Order.findById(orderId).populate("products.product");
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
 
-    res.status(200).json(orderWithProductDetails);
+      const productItem = order.products.find(
+        (item) => item.product._id.toString() === productId
+      );
+      if (!productItem) {
+        return res.status(404).json({ message: "Product not found in order" });
+      }
+
+      const product = productItem.product;
+      const seller = productItem.seller;
+      const quantity = productItem.quantity;
+
+      let sellerSoldCount = 0;
+      if (product && seller) {
+        const sellerSoldCounts = await Product.aggregate([
+          { $match: { _id: product, seller } },
+          { $group: { _id: "$seller", soldCount: { $sum: "$soldCount" } } },
+        ]);
+        if (sellerSoldCounts.length > 0) {
+          sellerSoldCount = sellerSoldCounts[0].soldCount;
+        }
+      }
+
+      const productDetails = {
+        id: product._id,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        thumbnail: product.thumbnail,
+        rating: product.rating,
+        discountPercentage: product.discountPercentage,
+        stock: product.stock,
+        images: product.images,
+        brand: product.brand,
+        category: product.category,
+        quantity,
+        sellerSoldCount,
+      };
+
+      const orderWithProductDetails = {
+        id: order._id,
+        name: order.name,
+        userId: order.userId,
+        address: order.address,
+        amount: order.amount,
+        status: productItem.status,
+        paymentId: order.paymentId,
+        products: [productDetails],
+        shippingDetails: productItem.shippingDetails,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        expectedDeliveryDate: order.expectedDeliveryDate,
+      };
+
+      client.setEx(cacheKey, 3600, JSON.stringify(orderWithProductDetails));
+
+      res.status(200).json(orderWithProductDetails);
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
     console.log(error);
   }
 };
 
-
 //<<<<<<<======================  DELETE ALL THE ORDERS FOR PERTICULAR USER ================>>>>>>>>
-
 
 exports.deleteAllOrders = async (req, res) => {
   try {
@@ -382,11 +403,7 @@ exports.deleteAllOrders = async (req, res) => {
   }
 };
 
-
-
-  //<<<<<<<======================  CANCLE ORDER ================>>>>>>>>
-
-
+//<<<<<<<======================  CANCLE ORDER ================>>>>>>>>
 
 exports.cancelOrder = async (req, res) => {
   try {
