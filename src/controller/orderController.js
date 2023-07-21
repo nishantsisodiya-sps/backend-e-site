@@ -97,6 +97,7 @@ exports.createOrder = async (req, res) => {
     // Decrement the stock of each product
     for (const product of products) {
       const productDoc = await Product.findById(product.id);
+    
       if (!productDoc) {
         res.status(404).json({ msg: "Product not found" });
         continue;
@@ -297,7 +298,6 @@ exports.getOrders = async (req, res) => {
 };
 
 //<<<<<<<======================  GET SINGLE ORDER ================>>>>>>>>
-
 
 exports.getSingleOrder = async (req, res) => {
   try {
