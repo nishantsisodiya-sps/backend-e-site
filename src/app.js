@@ -19,7 +19,7 @@ const superAdmin = require('./routes/superAdminRoutes');
 const updateDetails = require('./routes/updateDetailsRoute');
 
 
-;
+
 const path = require('path');
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());

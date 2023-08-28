@@ -20,3 +20,4 @@ superAdminCheck.authenticateUserOrSuperAdmin,
  router.get('/Allusers' , userController.getUsers)
 
 module.exports = router;
+    
